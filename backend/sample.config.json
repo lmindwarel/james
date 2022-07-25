@@ -1,0 +1,20 @@
+{
+    "logPath": "james.log",
+    "datastore": {
+        "user": "",
+        "password": "",
+        "name": "james",
+        "hosts": [
+            "mongo"
+        ]
+    },
+    "http": {
+        "serverPort": "8090",
+        "dataPath": "./data"
+    },
+    "mqtt": {
+        "broker": "ws://socket:9001",
+        "user": "",
+        "password": ""
+    }
+}
