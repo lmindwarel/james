@@ -8,14 +8,18 @@ import (
 	"github.com/lmindwarel/james/backend/controller"
 	"github.com/lmindwarel/james/backend/datastore"
 	"github.com/lmindwarel/james/backend/http"
+	"github.com/lmindwarel/james/backend/models"
 	"github.com/lmindwarel/james/backend/utils"
 )
 
 // Config is the core configuration
 type Config struct {
-	LogPath   string           `json:"logPath"`
-	Datastore datastore.Config `json:"datastore"`
-	API       http.Config      `json:"http"`
+	controller.Config
+	LogPath         string           `json:"logPath"`
+	Datastore       datastore.Config `json:"datastore"`
+	API             http.Config      `json:"http"`
+	SpotifyUser     string           `json:"spotifyUser"`
+	SpotifyPassword string           `json:"spotifyPassword"`
 }
 
 func main() {
@@ -56,16 +60,42 @@ func main() {
 	fmt.Printf("ok\n")
 
 	fmt.Printf("Initialize controller...")
-	ctrl := controller.New(ds)
+	ctrl := controller.New(ds, config.Config)
 	fmt.Printf("ok\n")
+
+	// fmt.Printf("Connecting spotify account...")
+	// err = ctrl.ConnectSpotifyAccount("4153cca5cb4544ad8973eb94a7de36e1", os.Getenv("SPOTIFY_SECRET"))
+	// if err != nil {
+	// 	panic(err)
+	// }
+	// fmt.Printf("ok\n")
+
+	// fmt.Printf("Get liked titles...")
+	// err = ctrl.GetLikedTitles()
+	// if err != nil {
+	// 	panic(err)
+	// }
+	// fmt.Printf("ok\n")
 
 	fmt.Printf("Initialize api...")
 	a := http.New(config.API, ctrl, ds)
-	err = a.StartServer()
+	go func() {
+		err = a.StartServer()
+		if err != nil {
+			panic(err)
+		}
+	}()
+	fmt.Printf("ok\n")
+
+	pass, err := utils.Encrypt(models.SpotifyPasswordHashKey, config.SpotifyPassword)
+
+	err = ctrl.AuthenticateSpotify(models.SpotifyCredentials{
+		User:           config.SpotifyUser,
+		HashedPassword: pass,
+	})
 	if err != nil {
 		panic(err)
 	}
-	fmt.Printf("ok\n")
 
 	utils.Standby()
 }

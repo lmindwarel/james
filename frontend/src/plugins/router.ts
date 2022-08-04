@@ -12,12 +12,17 @@ const router = createRouter({
       name: ROUTE_NAMES.AUTHENTICATION,
       component: () => import('@/views/Authentication.vue')
     },
+    {
+      path: '/playlist/:id',
+      name: ROUTE_NAMES.PLAYLIST,
+      component: () => import('@/views/Playlist.vue')
+    }
   ]
 })
 
 router.beforeEach((to, from, next) => {
-  if(!useAuthStore().isConnected && to.name !== ROUTE_NAMES.AUTHENTICATION) {
-      next({ name: ROUTE_NAMES.AUTHENTICATION })
+  if (!useAuthStore().isConnected && to.name !== ROUTE_NAMES.AUTHENTICATION) {
+    next({ name: ROUTE_NAMES.AUTHENTICATION })
   } else {
     next()
   }

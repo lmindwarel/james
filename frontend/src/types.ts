@@ -8,3 +8,9 @@ export interface AccountPatch{
     name?: string,
     icon?: string
 }
+
+export interface SpotifyPlaylist {
+    id: string,
+    name: string,
+    uri: string,
+}

@@ -19,3 +19,11 @@ type AccountPatch struct {
 	// Icon of the account
 	Icon *string `json:"icon" bson:"icon"`
 }
+
+const SpotifyPasswordHashKey = "example key 1234"
+const SpotifyDeviceName = "James"
+
+type SpotifyCredentials struct {
+	User           string `json:"user"`
+	HashedPassword string `json:"hashedPassword"`
+}
