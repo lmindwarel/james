@@ -1,78 +1,103 @@
 <template>
   <v-app>
-      <v-app-bar
-        color="primary"
-        app
-        
+    <v-app-bar
+      color="primary"
+      app
+    >
+      <div
+        class="d-flex"
+        @click="$router.push({name: $constants.ROUTE_NAMES.HOME})"
       >
-        <div @click="$router.push({name: $constants.ROUTE_NAMES.HOME})" class="d-flex">
-<v-app-bar-title class="font-weight-bold">
-            James
-          </v-app-bar-title>
-          <v-icon end>
-            mdi-comment-question-outline
-          </v-icon>
-        </div>
-        <v-sheet width="500" color="transparent">
-<v-text-field variant="solo" append-inner-icon="mdi-magnify" class="ml-6" bg-color="white" density="compact" hide-details single-line
-            placeholder="Rechercher..." v-model="search"></v-text-field>
-            </v-sheet>
- <div
-          class="d-flex align-center"
-        >
-        </div>
+        <v-app-bar-title class="font-weight-bold">
+          James
+        </v-app-bar-title>
+        <v-icon end>
+          mdi-comment-question-outline
+        </v-icon>
+      </div>
+      <v-sheet
+        width="500"
+        color="transparent"
+      >
+        <v-text-field
+          v-model="search"
+          variant="solo"
+          append-inner-icon="mdi-magnify"
+          class="ml-6"
+          bg-color="white"
+          density="compact"
+          hide-details
+          single-line
+          placeholder="Rechercher..."
+        />
+      </v-sheet>
+      <div
+        class="d-flex align-center"
+      />
 
-        <v-spacer></v-spacer>
+      <v-spacer />
 
-        <v-btn
-          >
-            <v-icon start>
-              mdi-account
-            </v-icon>
-            {{ authStore.connectedAccount?.name }}
-          </v-btn>
-      </v-app-bar>
+      <v-btn>
+        <v-icon start>
+          mdi-account
+        </v-icon>
+        {{ authStore.connectedAccount?.name }}
+      </v-btn>
+    </v-app-bar>
 
-              <v-navigation-drawer permanent>
+    <v-navigation-drawer permanent>
       <v-list nav>
-       <v-list-item prepend-icon="mdi-heart" title="Titres likés" to="/liked-tracks"></v-list-item>
+        <v-list-item
+          prepend-icon="mdi-heart"
+          title="Titres likés"
+          to="/liked-tracks"
+        />
 
-      <v-divider></v-divider>
+        <v-divider />
 
-      <v-sheet v-if="loadingPlaylists" height="200" class="d-flex justify-center align-center">
-        <v-progress-circular indeterminate></v-progress-circular>
-</v-sheet>
+        <v-sheet
+          v-if="loadingPlaylists"
+          height="200"
+          class="d-flex justify-center align-center"
+        >
+          <v-progress-circular indeterminate />
+        </v-sheet>
 
-       <v-list-item v-for="(playlist, i) in spotifyPlaylists" :key="`playlist-${i}`" :to="`/playlist/${playlist.uri}`" :title="playlist.name"></v-list-item>
+        <v-list-item
+          v-for="(playlist, i) in spotifyPlaylists"
+          :key="`playlist-${i}`"
+          :to="`/playlist/${playlist.uri}`"
+          :title="playlist.name"
+        />
       </v-list>
     </v-navigation-drawer>
 
-      <router-view />
+    <router-view />
 
-      <v-snackbar
-        v-model="snackbar.visible"
-        :color="snackbar.color"
-      >
-        {{ snackbar.message }}
+    <v-snackbar
+      v-model="snackbar.visible"
+      :color="snackbar.color"
+    >
+      {{ snackbar.message }}
 
-        <template #actions>
-          <v-btn
-            icon="mdi-close"
-            @click="snackbar.visible = false"
-          />
-        </template>
-      </v-snackbar>
+      <template #actions>
+        <v-btn
+          icon="mdi-close"
+          @click="snackbar.visible = false"
+        />
+      </template>
+    </v-snackbar>
 
-      <v-footer
-        app
-      >
-        <span class="white--text">&copy; {{ currentYear }}</span>
-        <v-spacer />
-        <span
-          v-if="buildType == 'development'"
-          class="white--text"
-        >{ development build }</span>
-      </v-footer>
+    <v-footer
+      app
+    >
+      <span class="white--text">&copy; {{ currentYear }}</span>
+      <v-spacer />
+      <span
+        v-if="buildType == 'development'"
+        class="white--text"
+      >{ development build }</span>
+    </v-footer>
   </v-app>
 </template>
 
@@ -107,20 +132,14 @@ export default {
 
     function fetchSpotifyPlaylists() {
       state.loadingPlaylists = true;
-      api.getSpotifyPlaylists().then(({ data }) => {
-        state.spotifyPlaylists = data;
-      }).finally(() => {
-        state.loadingPlaylists = false;
-      });
-    }
-
-    function showPlaylist(id: string) {
-      router.push({
-        name: "playlist",
-        params: {
-          id,
-        },
-      });
+      api
+        .getSpotifyPlaylists()
+        .then(({ data }) => {
+          state.spotifyPlaylists = data ? data.items : [];
+        })
+        .finally(() => {
+          state.loadingPlaylists = false;
+        });
     }
 
     onMounted(fetchSpotifyPlaylists);
@@ -141,7 +160,7 @@ export default {
       }
     );
 
-    eventbus.on("unhandled-api-error", function (err) {
+    eventbus.on("unhandled-api-error", (err: string) => {
       console.error(err);
       eventbus.notifyError(
         "J'ai piscine ont piscine. Réessayez dans un instant."

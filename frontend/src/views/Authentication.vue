@@ -1,54 +1,72 @@
 <template>
-    <div class="fill-height d-flex justify-center align-center">
-        <v-card width="600" height="300">
-          <v-card-title>
-            Comptes
-          </v-card-title>
-            <v-window v-model="page">
-      <v-window-item>
-        <v-list tile>
-                <v-list-item v-for="account in accounts" :key="account.id" @click="login(account)">
-                    <v-list-item-avatar start>
-                        <v-icon>{{account.icon || 'mdi-account'}}</v-icon> 
-                    </v-list-item-avatar>
-                    <v-list-item-header>
-                        <v-list-item-title>
-                            {{account.name}}
-                        </v-list-item-title>
-                    </v-list-item-header>
-                </v-list-item>
-                <v-list-item @click="page = 1">
-                  <v-list-item-avatar start>
-                    <v-icon>mdi-account-plus</v-icon>
-                  </v-list-item-avatar>
-                    <v-list-item-header>
-                        <v-list-item-title>
-                            Ajouter un compte
-                        </v-list-item-title>
-                    </v-list-item-header>
-                </v-list-item>
-            </v-list>
-      </v-window-item>
-      <v-window-item>
-        <v-card-text>
+  <div class="fill-height d-flex justify-center align-center">
+    <v-card
+      width="600"
+      height="300"
+    >
+      <v-card-title>
+        Comptes
+      </v-card-title>
+      <v-window v-model="page">
+        <v-window-item>
+          <v-list tile>
+            <v-list-item
+              v-for="account in accounts"
+              :key="account.id"
+              @click="login(account)"
+            >
+              <v-list-item-avatar start>
+                <v-icon>{{ account.icon || 'mdi-account' }}</v-icon> 
+              </v-list-item-avatar>
+              <v-list-item-header>
+                <v-list-item-title>
+                  {{ account.name }}
+                </v-list-item-title>
+              </v-list-item-header>
+            </v-list-item>
+            <v-list-item @click="page = 1">
+              <v-list-item-avatar start>
+                <v-icon>mdi-account-plus</v-icon>
+              </v-list-item-avatar>
+              <v-list-item-header>
+                <v-list-item-title>
+                  Ajouter un compte
+                </v-list-item-title>
+              </v-list-item-header>
+            </v-list-item>
+          </v-list>
+        </v-window-item>
+        <v-window-item>
+          <v-card-text>
             <div class="d-flex justify-space-between">
-<v-btn @click="page = 0" flat>
-            <v-icon start>
-                mdi-arrow-left
-            </v-icon>
-            Retour
-        </v-btn>
-        <v-btn color="success" :disabled="!newAccountName.trim()" @click="createAccount">
-            Créer
-        </v-btn>
+              <v-btn
+                flat
+                @click="page = 0"
+              >
+                <v-icon start>
+                  mdi-arrow-left
+                </v-icon>
+                Retour
+              </v-btn>
+              <v-btn
+                color="success"
+                :disabled="!newAccountName.trim()"
+                @click="createAccount"
+              >
+                Créer
+              </v-btn>
             </div>
 
-        <v-text-field v-model="newAccountName" label="Pseudo" class="my-4"></v-text-field>
-                </v-card-text>
-      </v-window-item>
-    </v-window>
-        </v-card>
-    </div>
+            <v-text-field
+              v-model="newAccountName"
+              label="Pseudo"
+              class="my-4"
+            />
+          </v-card-text>
+        </v-window-item>
+      </v-window>
+    </v-card>
+  </div>
 </template>
 
 <script lang="ts">
