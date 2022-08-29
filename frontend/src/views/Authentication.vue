@@ -1,5 +1,14 @@
 <template>
-  <div class="fill-height d-flex justify-center align-center">
+  <div class="fill-height d-flex flex-column justify-center align-center">
+    <div class="d-flex flex-column justify-center align-center mb-12">
+      <v-icon
+        size="150"
+        class="mb-4"
+      >
+        mdi-robot-excited-outline
+      </v-icon>
+      <span class="text-h1">Hello, moi c'est James !</span>
+    </div>
     <v-card
       width="600"
       height="300"

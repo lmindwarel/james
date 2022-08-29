@@ -11,7 +11,9 @@ func (a *API) setupRoutes(e *gin.Engine) {
 	e.POST("/accounts", a.PostAccount)
 	spotify := e.Group("/spotify")
 	spotify.GET("/playlists", a.GetSpotifyPlaylists)
-	spotify.GET("/playlists/:uri/tracks", a.GetSpotifyPlaylistTracks)
+	spotify.GET("/playlists/:id", a.GetSpotifyPlaylist)
+	spotify.GET("/playlists/:id/tracks", a.GetSpotifyPlaylistTracks)
+	spotify.PUT("/play-track/:id", a.PlaySpotifyTrack)
 
 	// authenticated only
 	// Authorization group

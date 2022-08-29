@@ -1,8 +1,8 @@
 import axios from 'axios'
 import { useAuthStore } from '@/plugins/store/auth'
-import { Account, AccountPatch, SpotifyPlaylistsResult, SpotifyTrack } from '@/types'
+import { Account, AccountPatch, SpotifyPlaylist, SpotifyPlaylistsResult, SpotifyPlaylistTracksResult, SpotifyTrack } from '@/types'
 
-let apiClient = axios.create({
+const apiClient = axios.create({
   // @ts-ignore
   baseURL: import.meta.env.VITE_JAMES_API_ADDRESS,
   headers: {
@@ -10,7 +10,7 @@ let apiClient = axios.create({
   },
   transformRequest: [function (req, headers) {
     if (headers){
-      let accountID = useAuthStore().connectedAccount?.id
+      const accountID = useAuthStore().connectedAccount?.id
       if (accountID) {
         headers['X-Doer'] = accountID
       }
@@ -37,5 +37,7 @@ export default {
   getAccounts: () => apiClient.get<Account[]>('/accounts'),
   postAccount: (account: AccountPatch) => apiClient.post<Account>('/accounts', account),
   getSpotifyPlaylists: () => apiClient.get<SpotifyPlaylistsResult>('/spotify/playlists'),
-  getSpotifyPlaylistTracks: (playlistID: string) => apiClient.get<SpotifyTrack[]>(`/spotify/playlists/${playlistID}/tracks`)
+  getSpotifyPlaylist:(id: string)=> apiClient.get<SpotifyPlaylist>(`/spotify/playlists/${id}`),
+  getSpotifyPlaylistTracks: (playlistID: string) => apiClient.get<SpotifyPlaylistTracksResult>(`/spotify/playlists/${playlistID}/tracks`),
+  playSpotifyTrack: (id:string) => apiClient.put(`/spotify/play-track/${id}`)
 }

@@ -1,3 +1,4 @@
+import { Moment } from 'moment'
 
 export interface Account {
     id: string,
@@ -5,7 +6,7 @@ export interface Account {
     icon: string
 }
 
-export interface AccountPatch{
+export interface AccountPatch {
     name?: string,
     icon?: string
 }
@@ -15,7 +16,7 @@ export interface SpotifyPagination {
     limit: number,
     offset: number,
 }
-export interface SpotifyPlaylistsResult extends SpotifyPagination{
+export interface SpotifyPlaylistsResult extends SpotifyPagination {
     items: SpotifyPlaylist[]
 }
 
@@ -23,10 +24,30 @@ export interface SpotifyPlaylist {
     id: string,
     name: string,
     uri: string,
+    images: SpotifyImage[]
 }
 
 export interface SpotifyTrack {
     id: string,
     name: string,
     uri: string,
+    album: SpotifyAlbum
+    duration_ms: number
+}
+
+export interface SpotifyPlaylistTracksResult extends SpotifyPagination {
+    items: SpotifyPlaylistTrack[]
+}
+
+export interface SpotifyImage {
+    url: string
+}
+
+export interface SpotifyAlbum {
+    id: string
+    name: string
+}
+export interface SpotifyPlaylistTrack {
+    added_at: string,
+    track: SpotifyTrack
 }

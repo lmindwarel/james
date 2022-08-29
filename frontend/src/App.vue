@@ -1,6 +1,7 @@
 <template>
   <v-app>
     <v-app-bar
+      v-if="!$route.meta.disableLayout"
       color="primary"
       app
     >
@@ -8,12 +9,12 @@
         class="d-flex"
         @click="$router.push({name: $constants.ROUTE_NAMES.HOME})"
       >
+        <v-icon start>
+          mdi-robot-excited-outline
+        </v-icon>
         <v-app-bar-title class="font-weight-bold">
           James
         </v-app-bar-title>
-        <v-icon end>
-          mdi-comment-question-outline
-        </v-icon>
       </div>
       <v-sheet
         width="500"
@@ -45,7 +46,10 @@
       </v-btn>
     </v-app-bar>
 
-    <v-navigation-drawer permanent>
+    <v-navigation-drawer
+      v-if="!$route.meta.disableLayout"
+      permanent
+    >
       <v-list nav>
         <v-list-item
           prepend-icon="mdi-heart"
@@ -66,7 +70,7 @@
         <v-list-item
           v-for="(playlist, i) in spotifyPlaylists"
           :key="`playlist-${i}`"
-          :to="`/playlist/${playlist.uri}`"
+          :to="`/playlist/${playlist.id}`"
           :title="playlist.name"
         />
       </v-list>

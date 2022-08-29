@@ -10,10 +10,11 @@ const router = createRouter({
     {
       path: '/authentication',
       name: ROUTE_NAMES.AUTHENTICATION,
-      component: () => import('@/views/Authentication.vue')
+      component: () => import('@/views/Authentication.vue'),
+      meta: { disableLayout: true }
     },
     {
-      path: '/playlist/:uri',
+      path: '/playlist/:id',
       name: ROUTE_NAMES.PLAYLIST,
       component: () => import('@/views/Playlist.vue')
     }

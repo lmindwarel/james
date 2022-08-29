@@ -11,6 +11,8 @@ require (
 	github.com/patrickmn/go-cache v2.1.0+incompatible
 	github.com/pkg/errors v0.9.1
 	github.com/satori/go.uuid v1.2.0
+	github.com/xlab/portaudio-go v0.0.0-20170905165025-132d041879db
+	github.com/xlab/vorbis-go v0.0.0-20190125051917-087364aef51d
 	github.com/zmb3/spotify v1.3.0
 	github.com/zmb3/spotify/v2 v2.2.1
 	go.mongodb.org/mongo-driver v1.8.1
