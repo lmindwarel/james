@@ -126,6 +126,9 @@ export default {
       refresh();
     });
 
+
+
+
     watch(
       () => route.params.uri,
       () => {

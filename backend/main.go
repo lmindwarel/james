@@ -9,7 +9,9 @@ import (
 	"github.com/lmindwarel/james/backend/datastore"
 	"github.com/lmindwarel/james/backend/http"
 	"github.com/lmindwarel/james/backend/models"
+	"github.com/lmindwarel/james/backend/spotify"
 	"github.com/lmindwarel/james/backend/utils"
+	"github.com/xlab/portaudio-go/portaudio"
 )
 
 // Config is the core configuration
@@ -86,6 +88,10 @@ func main() {
 		}
 	}()
 	fmt.Printf("ok\n")
+
+	if err := portaudio.Initialize(); spotify.PAError(err) {
+		panic("PortAudio init error: " + spotify.PAErrorText(err))
+	}
 
 	pass, err := utils.Encrypt(models.SpotifyPasswordHashKey, config.SpotifyPassword)
 

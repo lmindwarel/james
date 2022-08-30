@@ -8,12 +8,12 @@ import (
 )
 
 // PortAudio helpers
-func paError(err portaudio.Error) bool {
+func PAError(err portaudio.Error) bool {
 	return portaudio.ErrorCode(err) != portaudio.PaNoError
 
 }
 
-func paErrorText(err portaudio.Error) string {
+func PAErrorText(err portaudio.Error) string {
 	return "PortAudio error: " + portaudio.GetErrorText(err)
 }
 
@@ -21,6 +21,8 @@ func paCallback(wg *sync.WaitGroup, channels int, samples <-chan [][]float32) po
 	wg.Add(1)
 	return func(_ unsafe.Pointer, output unsafe.Pointer, sampleCount uint,
 		_ *portaudio.StreamCallbackTimeInfo, _ portaudio.StreamCallbackFlags, _ unsafe.Pointer) int32 {
+
+		log.Debugf("paCallback")
 
 		const (
 			statusContinue = int32(portaudio.PaContinue)
