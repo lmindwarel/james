@@ -27,3 +27,9 @@ type SpotifyTrack struct {
 	Name string     `json:"name"`
 	URI  SpotifyURI `json:"uri"`
 }
+
+type SpotifyPlayerControl struct {
+	Volume          *float64 `json:"volume"`
+	TrackPositionMs *int     `json:"track_position_ms"`
+	Pause           *bool    `json:"pause"`
+}

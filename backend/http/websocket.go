@@ -1,0 +1,65 @@
+package http
+
+import (
+	"time"
+
+	"github.com/gin-gonic/gin"
+	"github.com/gorilla/websocket"
+	"github.com/lmindwarel/james/backend/spotify"
+)
+
+type InWebsocketMessage struct {
+	Topic string `json:"topic"`
+	Data  []byte `json:"data"`
+}
+
+type OutWebsocketMessage struct {
+	Topic string      `json:"topic"`
+	Data  interface{} `json:"data"`
+}
+
+var wsupgrader = websocket.Upgrader{
+	ReadBufferSize:  1024,
+	WriteBufferSize: 1024,
+}
+
+func (a *API) wshandler(c *gin.Context) {
+	conn, err := wsupgrader.Upgrade(c.Writer, c.Request, nil)
+	if err != nil {
+		log.Errorf("Failed to set websocket upgrade: %+v", err)
+		return
+	}
+
+	a.websocketConnection = conn
+	spotifySession, notFatalErr := a.ctrl.GetSpotifySession()
+	if notFatalErr == nil {
+		spotifySession.ListenOnPlayerStatusChange(func(s spotify.PlayerStatus) {
+			conn.WriteJSON(OutWebsocketMessage{
+				Topic: "player-status",
+				Data:  s,
+			})
+		})
+	}
+
+	ticker := time.NewTicker(100 * time.Millisecond)
+
+	for {
+		select {
+		case <-ticker.C:
+			var message InWebsocketMessage
+			err := conn.ReadJSON(&message)
+			if err != nil {
+				return
+			}
+
+			a.HandleWebsocketMessage(message)
+		}
+	}
+}
+
+func (a *API) HandleWebsocketMessage(msg InWebsocketMessage) {
+	switch msg.Topic {
+	default:
+		log.Warning("Unhandled websocket message: %v", msg.Topic)
+	}
+}

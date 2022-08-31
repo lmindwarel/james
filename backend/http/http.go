@@ -4,6 +4,7 @@ import (
 	"net/http"
 
 	"github.com/gin-contrib/cors"
+	"github.com/gorilla/websocket"
 	"github.com/lmindwarel/james/backend/datastore"
 	"github.com/lmindwarel/james/backend/models"
 	"github.com/pkg/errors"
@@ -25,9 +26,10 @@ type Config struct {
 
 // API is the api object
 type API struct {
-	config Config
-	ctrl   *controller.Controller
-	ds     *datastore.Datastore
+	config              Config
+	ctrl                *controller.Controller
+	ds                  *datastore.Datastore
+	websocketConnection *websocket.Conn
 }
 
 type APIError struct {

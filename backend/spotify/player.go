@@ -5,6 +5,8 @@ import (
 	"io"
 	"time"
 
+	"github.com/faiface/beep"
+	"github.com/faiface/beep/effects"
 	"github.com/faiface/beep/speaker"
 	"github.com/faiface/beep/vorbis"
 	"github.com/librespot-org/librespot-golang/Spotify"
@@ -105,33 +107,76 @@ func (s *Session) PlayTrack(id ID) error {
 
 	// Synchronously load the track
 	audioFile, err := s.librespotSession.Player().LoadTrack(selectedFile, track.GetGid())
-
-	// TODO: channel to be notified of chunks downloaded (or reader?)
-
 	if err != nil {
-		fmt.Printf("Error while loading track: %s\n", err)
-	} else {
-		// We have the track audio, let's play it! Initialize the OGG decoder, and start a PortAudio stream.
-		// Note that we skip the first 167 bytes as it is a Spotify-specific header. You can decode it by
-		// using this: https://sourceforge.net/p/despotify/code/HEAD/tree/java/trunk/src/main/java/se/despotify/client/player/SpotifyOggHeader.java
-		fmt.Println("Setting up OGG decoder...")
-		// dec, err := decoder.New(audioFile, samplesPerChannel)
-		// if err != nil {
-		// 	return errors.Wrap(err, "failed to load decoder")
-		// }
-
-		fmt.Println("Setting up PortAudio stream...")
-		// fmt.Printf("PortAudio channels: %d / SampleRate: %f\n", info.Channels, info.SampleRate)
-
-		streamer, format, err := vorbis.Decode(io.NopCloser(audioFile))
-		if err != nil {
-			log.Fatal(err)
-		}
-
-		speaker.Init(format.SampleRate, format.SampleRate.N(time.Second/10))
-		speaker.Play(streamer)
-
+		return errors.Wrap(err, "failed to load track")
 	}
 
+	// We have the track audio, let's play it! Initialize the OGG decoder, and start a PortAudio stream.
+	// Note that we skip the first 167 bytes as it is a Spotify-specific header. You can decode it by
+	// using this: https://sourceforge.net/p/despotify/code/HEAD/tree/java/trunk/src/main/java/se/despotify/client/player/SpotifyOggHeader.java
+	fmt.Println("Setting up OGG decoder...")
+	// dec, err := decoder.New(audioFile, samplesPerChannel)
+	// if err != nil {
+	// 	return errors.Wrap(err, "failed to load decoder")
+	// }
+
+	fmt.Println("Setting up PortAudio stream...")
+	// fmt.Printf("PortAudio channels: %d / SampleRate: %f\n", info.Channels, info.SampleRate)
+
+	streamer, format, err := vorbis.Decode(io.NopCloser(audioFile))
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	speaker.Lock()
+	s.player.streamer = streamer
+	s.player.ctrl = &beep.Ctrl{Streamer: beep.Loop(-1, streamer)}
+	s.player.resampler = beep.ResampleRatio(4, 1, s.player.ctrl)
+	s.player.volume = &effects.Volume{Streamer: s.player.resampler, Base: 2}
+	speaker.Unlock()
+
+	speaker.Init(format.SampleRate, format.SampleRate.N(time.Second/10))
+	speaker.Play(streamer)
+
+	s.player.CurrentTrackID = id
+	s.player.State = PlayerState(PlayerStatePlaying)
+	s.listeners.OnPlayerStatusChange(s.player.PlayerStatus)
+	s.StartPlayerListener()
+
 	return nil
+}
+
+func (s *Session) Pause() {
+	speaker.Lock()
+	s.player.ctrl.Paused = true
+	s.player.State = PlayerState(PlayerStatePaused)
+	s.listeners.OnPlayerStatusChange(s.player.PlayerStatus)
+	speaker.Unlock()
+}
+
+func (s *Session) Resume() {
+	speaker.Lock()
+	s.player.ctrl.Paused = false
+	s.player.State = PlayerState(PlayerStatePlaying)
+	s.listeners.OnPlayerStatusChange(s.player.PlayerStatus)
+	speaker.Unlock()
+}
+
+func (s *Session) StartPlayerListener() {
+	ticker := time.NewTicker(time.Second)
+
+	go func() {
+		for {
+			select {
+			case <-ticker.C:
+				s.player.TrackPosition = s.player.sampleRate.D(s.player.streamer.Position())
+				s.player.TrackDuration = s.player.sampleRate.D(s.player.streamer.Len())
+				s.listeners.OnPlayerStatusChange(s.player.PlayerStatus)
+
+				if s.player.State != PlayerState(PlayerStatePlaying) {
+					return
+				}
+			}
+		}
+	}()
 }

@@ -7,13 +7,17 @@ import (
 func (a *API) setupRoutes(e *gin.Engine) {
 
 	// public router
+	e.GET("/ws", func(c *gin.Context) {
+		wshandler(c.Writer, c.Request)
+	})
 	e.GET("/accounts", a.GetAccounts)
 	e.POST("/accounts", a.PostAccount)
 	spotify := e.Group("/spotify")
 	spotify.GET("/playlists", a.GetSpotifyPlaylists)
 	spotify.GET("/playlists/:id", a.GetSpotifyPlaylist)
 	spotify.GET("/playlists/:id/tracks", a.GetSpotifyPlaylistTracks)
-	spotify.PUT("/play-track/:id", a.PlaySpotifyTrack)
+	spotify.PUT("/player/play/:id", a.PlaySpotifyTrack)
+	spotify.PUT("/player/control", a.ControlSpotifyPlayer)
 
 	// authenticated only
 	// Authorization group

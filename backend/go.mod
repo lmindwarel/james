@@ -7,6 +7,7 @@ require (
 	github.com/faiface/beep v1.1.0
 	github.com/gin-contrib/cors v1.3.1
 	github.com/gin-gonic/gin v1.7.7
+	github.com/gorilla/websocket v1.5.0
 	github.com/librespot-org/librespot-golang v0.0.0-20220325184705-31669e5a889f
 	github.com/op/go-logging v0.0.0-20160315200505-970db520ece7
 	github.com/patrickmn/go-cache v2.1.0+incompatible
