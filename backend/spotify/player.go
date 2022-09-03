@@ -133,12 +133,13 @@ func (s *Session) PlayTrack(id ID) error {
 	s.player.ctrl = &beep.Ctrl{Streamer: beep.Loop(-1, streamer)}
 	s.player.resampler = beep.ResampleRatio(4, 1, s.player.ctrl)
 	s.player.volume = &effects.Volume{Streamer: s.player.resampler, Base: 2}
+	s.player.sampleRate = format.SampleRate
 	speaker.Unlock()
 
 	speaker.Init(format.SampleRate, format.SampleRate.N(time.Second/10))
 	speaker.Play(streamer)
 
-	s.player.CurrentTrackID = id
+	s.player.CurrentTrackID = &id
 	s.player.State = PlayerState(PlayerStatePlaying)
 	s.listeners.OnPlayerStatusChange(s.player.PlayerStatus)
 	s.StartPlayerListener()

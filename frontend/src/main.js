@@ -6,6 +6,7 @@ import router from '@/plugins/router'
 import constants from '@/plugins/constants'
 import { loadFonts } from './plugins/webfontloader'
 import eventbus from '@/services/eventbus'
+import '@/services/websocket'
 
 loadFonts()
 const pinia = createPinia()

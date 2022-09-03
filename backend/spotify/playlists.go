@@ -95,3 +95,12 @@ func (s *Session) GetPlaylistTracks(ctx context.Context, id ID) (result *spotify
 
 	// return
 }
+
+func (s *Session) GetTrack(ctx context.Context, id ID) (result *spotify.FullTrack, err error) {
+	result, err = s.webapiClient.GetTrack(ctx, spotify.ID(id))
+	if err != nil || result == nil {
+		return result, errors.Wrapf(err, "failed to get track %s", id)
+	}
+
+	return
+}

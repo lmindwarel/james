@@ -69,6 +69,21 @@ func (a *API) PlaySpotifyTrack(c *gin.Context) {
 	c.Status(http.StatusOK)
 }
 
+func (a *API) GetSpotifyTrack(c *gin.Context) {
+	spotifySession, err := a.ctrl.GetSpotifySession()
+	if err != nil {
+		c.AbortWithError(http.StatusNetworkAuthenticationRequired, err)
+	}
+
+	track, err := spotifySession.GetTrack(c.Request.Context(), spotify.ID(c.Param("id")))
+	if err != nil {
+		c.AbortWithError(http.StatusInternalServerError, err)
+		return
+	}
+
+	c.JSON(http.StatusOK, track)
+}
+
 func (a *API) ControlSpotifyPlayer(c *gin.Context) {
 	var control models.SpotifyPlayerControl
 	err := c.BindJSON(&control)

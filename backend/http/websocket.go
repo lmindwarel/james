@@ -1,6 +1,7 @@
 package http
 
 import (
+	"net/http"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -21,12 +22,15 @@ type OutWebsocketMessage struct {
 var wsupgrader = websocket.Upgrader{
 	ReadBufferSize:  1024,
 	WriteBufferSize: 1024,
+	CheckOrigin: func(r *http.Request) bool {
+		return true
+	},
 }
 
 func (a *API) wshandler(c *gin.Context) {
 	conn, err := wsupgrader.Upgrade(c.Writer, c.Request, nil)
 	if err != nil {
-		log.Errorf("Failed to set websocket upgrade: %+v", err)
+		log.Errorf("Failed to set upgrade request to websocket: %+v", err)
 		return
 	}
 

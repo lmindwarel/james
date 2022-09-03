@@ -49,6 +49,7 @@
     <v-navigation-drawer
       v-if="!$route.meta.disableLayout"
       permanent
+      absolute
     >
       <v-list nav>
         <v-list-item
@@ -93,14 +94,13 @@
     </v-snackbar>
 
     <v-footer
+      v-if="!$route.meta.disableLayout"
       app
+      elevation="2"
+      class="ml-0"
+      style="width: 100%; z-index: 2000"
     >
-      <span class="white--text">&copy; {{ currentYear }}</span>
-      <v-spacer />
-      <span
-        v-if="buildType == 'development'"
-        class="white--text"
-      >{ development build }</span>
+      <player />
     </v-footer>
   </v-app>
 </template>
@@ -112,12 +112,15 @@ import { computed, onMounted, reactive, ref, toRefs } from "vue";
 import { useRouter } from "vue-router";
 import { useAuthStore } from "@/plugins/store/auth";
 
+import Player from '@/components/Player.vue'
+
 import eventbus from "@/services/eventbus";
 import api from "@/services/api";
 
 import { SpotifyPlaylist } from "@/types";
 
 export default {
+  components: {Player},
   setup() {
     const authStore = useAuthStore();
     const router = useRouter();

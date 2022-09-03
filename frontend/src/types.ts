@@ -51,3 +51,27 @@ export interface SpotifyPlaylistTrack {
     added_at: string,
     track: SpotifyTrack
 }
+
+export enum PlayerStates {
+    Playing = 'playing',
+    Paused = 'paused',
+    Stopped = 'stopped',
+}
+
+export interface WebsocketMessage {
+    topic: string,
+    data: any,
+}
+
+export interface PlayerStatus {
+	state: PlayerStates
+    current_track_id: string
+	track_duration: number
+	track_position: number
+}
+
+export interface SpotifyPlayerControl {
+	volume?: number
+	track_position_ms?: number,     
+	pause?: boolean    
+}

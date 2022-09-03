@@ -1,6 +1,6 @@
 import axios from 'axios'
 import { useAuthStore } from '@/plugins/store/auth'
-import { Account, AccountPatch, SpotifyPlaylist, SpotifyPlaylistsResult, SpotifyPlaylistTracksResult, SpotifyTrack } from '@/types'
+import { Account, AccountPatch, SpotifyPlayerControl, SpotifyPlaylist, SpotifyPlaylistsResult, SpotifyPlaylistTracksResult, SpotifyTrack } from '@/types'
 
 const apiClient = axios.create({
   // @ts-ignore
@@ -39,5 +39,7 @@ export default {
   getSpotifyPlaylists: () => apiClient.get<SpotifyPlaylistsResult>('/spotify/playlists'),
   getSpotifyPlaylist:(id: string)=> apiClient.get<SpotifyPlaylist>(`/spotify/playlists/${id}`),
   getSpotifyPlaylistTracks: (playlistID: string) => apiClient.get<SpotifyPlaylistTracksResult>(`/spotify/playlists/${playlistID}/tracks`),
-  playSpotifyTrack: (id:string) => apiClient.put(`/spotify/play-track/${id}`)
+  getSpotifyTrack: (trackID: string) => apiClient.get<SpotifyTrack>(`/spotify/tracks/${trackID}`),
+  playSpotifyTrack: (id:string) => apiClient.put(`/spotify/player/play/${id}`),
+  controlSpotifyPlayer: (control: SpotifyPlayerControl)=> apiClient.put('/spotify/player/control', control)
 }
