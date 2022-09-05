@@ -46,6 +46,7 @@ export interface SpotifyImage {
 export interface SpotifyAlbum {
     id: string
     name: string
+    images: SpotifyImage[]
 }
 export interface SpotifyPlaylistTrack {
     added_at: string,

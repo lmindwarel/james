@@ -4,7 +4,18 @@
     align="center"
   >
     <v-col cols="2">
-      Musique en cours
+      <div class="d-flex">
+        <v-img
+          v-if="playerStore.currentTrack"
+          aspect-ratio="1"
+          height="50"
+          :src="playerStore.currentTrack.album.images[0].url"
+        />
+        <v-icon size="100">
+          <mdi-music />
+        </v-icon>
+        <span v-if="playerStore.currentTrack">{{ playerStore.currentTrack.name }}</span>
+      </div>
     </v-col>
 
     <v-col cols="4">
@@ -29,6 +40,7 @@
         <v-slider
           v-model="progression"
           hide-details
+          class="mx-2"
           density="compact"
         />
         {{ trackDurationText }}
@@ -45,33 +57,54 @@
 
 <script lang="ts">
 import { computed, ref } from "vue";
-import { usePlayerStore } from '@/plugins/store/player';
-import { millisToMinutesAndSeconds } from '@/utils'
-import { PlayerStates } from '@/types';
-import api from '@/services/api';
+import { usePlayerStore } from "@/plugins/store/player";
+import { millisToMinutesAndSeconds } from "@/utils";
+import { PlayerStates, SpotifyPlayerControl } from "@/types";
+import api from "@/services/api";
+import _ from "lodash";
 
 export default {
   setup() {
-    let playerStore = usePlayerStore()
+    let playerStore = usePlayerStore();
+
+    const controlDebouced = _.debounce((control: SpotifyPlayerControl) => {
+      api.controlSpotifyPlayer(control).then(res => {
+        playerStore.updateFromPlayerStatus(res.data)
+      });
+    }, 400);
 
     let progression = computed({
-        get(){
-        return playerStore.currentTrack ? playerStore.track_position / playerStore.currentTrack?.duration_ms : 0
-        },
-        set(newValue: number){
-            if(playerStore.currentTrack){
-                api.controlSpotifyPlayer({track_position_ms: playerStore.currentTrack?.duration_ms * newValue})
-            }
+      get() {
+        return playerStore.currentTrack
+          ? (playerStore.track_position / playerStore.currentTrack?.duration_ms) * 100
+          : 0;
+      },
+      set(newValue: number) {
+        if (playerStore.currentTrack) {
+          controlDebouced({
+            track_position_ms: Math.floor(
+              playerStore.currentTrack?.duration_ms * (newValue / 100)
+            ),
+          });
         }
-    })
+      },
+    });
 
-    let progressionText = computed(() => millisToMinutesAndSeconds(playerStore.track_position))
-    let trackDurationText = computed(() => playerStore.currentTrack ? millisToMinutesAndSeconds(playerStore.currentTrack.duration_ms) : '0:00')
+    let progressionText = computed(() =>
+      millisToMinutesAndSeconds(playerStore.track_position)
+    );
+    let trackDurationText = computed(() =>
+      playerStore.currentTrack
+        ? millisToMinutesAndSeconds(playerStore.currentTrack.duration_ms)
+        : "0:00"
+    );
 
-    function togglePlayerState(){
-        if(playerStore.currentTrack){
-            api.controlSpotifyPlayer({pause: playerStore.state == PlayerStates.Playing})
-        }
+    function togglePlayerState() {
+      if (playerStore.currentTrack) {
+        controlDebouced({
+          pause: playerStore.state == PlayerStates.Playing,
+        });
+      }
     }
 
     return {
@@ -80,7 +113,7 @@ export default {
       PlayerStates,
       togglePlayerState,
       progressionText,
-      trackDurationText
+      trackDurationText,
     };
   },
 };

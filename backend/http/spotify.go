@@ -2,6 +2,7 @@ package http
 
 import (
 	"net/http"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/lmindwarel/james/backend/models"
@@ -97,6 +98,8 @@ func (a *API) ControlSpotifyPlayer(c *gin.Context) {
 		c.AbortWithError(http.StatusNetworkAuthenticationRequired, err)
 	}
 
+	log.Debugf("control: %v", control)
+
 	if control.Pause != nil {
 		if spotifySession.GetPlayerStatus().CurrentTrackID == nil {
 			c.AbortWithError(http.StatusNotAcceptable, errors.New("no current track"))
@@ -109,7 +112,18 @@ func (a *API) ControlSpotifyPlayer(c *gin.Context) {
 		}
 	}
 
-	// TODO: track position
+	if control.TrackPositionMs != nil {
+		if spotifySession.GetPlayerStatus().CurrentTrackID == nil {
+			c.AbortWithError(http.StatusNotAcceptable, errors.New("no current track"))
+			return
+		}
 
-	c.Status(http.StatusOK)
+		err = spotifySession.SetTrackPosition(time.Duration(*control.TrackPositionMs) * time.Millisecond)
+		if err != nil {
+			c.AbortWithError(http.StatusInternalServerError, err)
+			return
+		}
+	}
+
+	c.JSON(http.StatusOK, spotifySession.GetPlayerStatus())
 }

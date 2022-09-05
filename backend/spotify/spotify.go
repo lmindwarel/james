@@ -1,11 +1,10 @@
 package spotify
 
 import (
-	"time"
-
 	"github.com/faiface/beep"
 	"github.com/faiface/beep/effects"
 	"github.com/librespot-org/librespot-golang/librespot/core"
+	"github.com/lmindwarel/james/backend/models"
 	"github.com/lmindwarel/james/backend/utils"
 	"github.com/zmb3/spotify/v2"
 )
@@ -23,10 +22,10 @@ const (
 )
 
 type PlayerStatus struct {
-	State          PlayerState   `json:"state"`
-	CurrentTrackID *ID           `json:"current_track_id"`
-	TrackDuration  time.Duration `json:"track_duration"`
-	TrackPosition  time.Duration `json:"track_position"`
+	State          PlayerState       `json:"state"`
+	CurrentTrackID *ID               `json:"current_track_id"`
+	TrackDuration  models.DurationMs `json:"track_duration"`
+	TrackPosition  models.DurationMs `json:"track_position"`
 }
 
 type Player struct {

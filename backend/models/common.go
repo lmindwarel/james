@@ -1,5 +1,10 @@
 package models
 
+import (
+	"fmt"
+	"time"
+)
+
 // Rating hold informations about user rating on element (Quizz, etc.)
 type Rating struct {
 	// Value is the rating value (Generally between 0 and 5 stars)
@@ -26,4 +31,10 @@ var DefaultPaginationFilters = Pagination{
 type PaginatedResults struct {
 	Pagination
 	Total int64
+}
+
+type DurationMs time.Duration
+
+func (d DurationMs) MarshalJSON() (b []byte, err error) {
+	return []byte(fmt.Sprintf("%d", time.Duration(d).Milliseconds())), nil
 }

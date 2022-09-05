@@ -22,6 +22,7 @@ websocket.onerror = function (err) {
 function handleMessage(message: WebsocketMessage){
     switch(message.topic){
         case "player-status":
+            console.log(message.data)
             const playerStore = usePlayerStore()
             playerStore.updateFromPlayerStatus(message.data as PlayerStatus)
 

@@ -53,7 +53,7 @@
           <td>{{ playlistTrack.track.album.name }}</td>
           <td>{{ moment(playlistTrack.added_at).format("DD MMM. YYYY") }}</td>
           <td class="text-right">
-            {{ playlistTrack.track.duration_ms }} ms
+            {{ millisToMinutesAndSeconds(playlistTrack.track.duration_ms) }}
           </td>
         </tr>
       </tbody>
@@ -66,6 +66,7 @@ import { reactive, onMounted, watch, toRefs } from "vue";
 import { SpotifyPlaylistTrack, SpotifyPlaylist } from "@/types";
 import { useRoute } from "vue-router";
 import api from "@/services/api";
+import { millisToMinutesAndSeconds } from "@/utils";
 import moment from 'moment'
 
 export default {
@@ -126,9 +127,6 @@ export default {
       refresh();
     });
 
-
-
-
     watch(
       () => route.params.uri,
       () => {
@@ -146,7 +144,8 @@ export default {
     return {
       ...toRefs(state),
       moment,
-      playTrack
+      playTrack,
+      millisToMinutesAndSeconds,
     }
   },
 };

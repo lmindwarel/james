@@ -2,7 +2,6 @@ package spotify
 
 import (
 	"fmt"
-	"io"
 	"time"
 
 	"github.com/faiface/beep"
@@ -11,6 +10,8 @@ import (
 	"github.com/faiface/beep/vorbis"
 	"github.com/librespot-org/librespot-golang/Spotify"
 	"github.com/librespot-org/librespot-golang/librespot/utils"
+	"github.com/lmindwarel/james/backend/models"
+	jamesUtils "github.com/lmindwarel/james/backend/utils"
 	"github.com/pkg/errors"
 )
 
@@ -100,12 +101,16 @@ func (s *Session) PlayTrack(id ID) error {
 	// app is the OGG 320kbps variant.
 	var selectedFile *Spotify.AudioFile
 	for _, file := range track.GetFile() {
-		if file.GetFormat() == Spotify.AudioFile_OGG_VORBIS_160 {
+		if jamesUtils.InArray([]Spotify.AudioFile_Format{Spotify.AudioFile_OGG_VORBIS_320, Spotify.AudioFile_OGG_VORBIS_160, Spotify.AudioFile_OGG_VORBIS_96}, file.GetFormat()) {
 			selectedFile = file
 		}
 	}
 
 	// Synchronously load the track
+	if selectedFile == nil {
+		return errors.New("Unsupported track format")
+	}
+
 	audioFile, err := s.librespotSession.Player().LoadTrack(selectedFile, track.GetGid())
 	if err != nil {
 		return errors.Wrap(err, "failed to load track")
@@ -123,7 +128,7 @@ func (s *Session) PlayTrack(id ID) error {
 	fmt.Println("Setting up PortAudio stream...")
 	// fmt.Printf("PortAudio channels: %d / SampleRate: %f\n", info.Channels, info.SampleRate)
 
-	streamer, format, err := vorbis.Decode(io.NopCloser(audioFile))
+	streamer, format, err := vorbis.Decode(audioFile)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -137,9 +142,10 @@ func (s *Session) PlayTrack(id ID) error {
 	speaker.Unlock()
 
 	speaker.Init(format.SampleRate, format.SampleRate.N(time.Second/10))
-	speaker.Play(streamer)
+	speaker.Play(s.player.volume)
 
 	s.player.CurrentTrackID = &id
+	s.player.TrackDuration = models.DurationMs(*track.Duration)
 	s.player.State = PlayerState(PlayerStatePlaying)
 	s.listeners.OnPlayerStatusChange(s.player.PlayerStatus)
 	s.StartPlayerListener()
@@ -149,18 +155,19 @@ func (s *Session) PlayTrack(id ID) error {
 
 func (s *Session) Pause() {
 	speaker.Lock()
+	defer speaker.Unlock()
 	s.player.ctrl.Paused = true
 	s.player.State = PlayerState(PlayerStatePaused)
 	s.listeners.OnPlayerStatusChange(s.player.PlayerStatus)
-	speaker.Unlock()
 }
 
 func (s *Session) Resume() {
 	speaker.Lock()
+	defer speaker.Unlock()
 	s.player.ctrl.Paused = false
 	s.player.State = PlayerState(PlayerStatePlaying)
 	s.listeners.OnPlayerStatusChange(s.player.PlayerStatus)
-	speaker.Unlock()
+	s.StartPlayerListener()
 }
 
 func (s *Session) StartPlayerListener() {
@@ -170,14 +177,45 @@ func (s *Session) StartPlayerListener() {
 		for {
 			select {
 			case <-ticker.C:
-				s.player.TrackPosition = s.player.sampleRate.D(s.player.streamer.Position())
-				s.player.TrackDuration = s.player.sampleRate.D(s.player.streamer.Len())
+				speaker.Lock()
+				s.player.TrackPosition = models.DurationMs(s.player.sampleRate.D(s.player.streamer.Position()))
 				s.listeners.OnPlayerStatusChange(s.player.PlayerStatus)
+				speaker.Unlock()
 
 				if s.player.State != PlayerState(PlayerStatePlaying) {
+					log.Debugf("player state: %s", s.player.State)
 					return
 				}
 			}
 		}
 	}()
+}
+
+func (s *Session) SetTrackPosition(pos time.Duration) error {
+	speaker.Lock()
+	defer speaker.Unlock()
+
+	log.Debugf("SetTrackPosition: %d", pos.Seconds())
+
+	newPos := s.player.sampleRate.N(pos)
+	log.Debugf("to sample: %d, duration: %d", newPos, s.player.streamer.Len())
+
+	if newPos < 0 {
+		newPos = 0
+	}
+	trackDurationSamplesLen := s.player.sampleRate.N(time.Duration(s.player.TrackDuration))
+	if newPos >= trackDurationSamplesLen {
+		newPos = trackDurationSamplesLen - 1
+	}
+
+	log.Debugf("SetTrackPosition: %d", s.player.sampleRate.D(newPos).Seconds())
+
+	err := s.player.streamer.Seek(newPos)
+	if err != nil {
+		return errors.Wrap(err, "failed to seek to position")
+	}
+
+	s.player.TrackPosition = models.DurationMs(pos)
+
+	return nil
 }
