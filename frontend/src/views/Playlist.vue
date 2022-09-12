@@ -32,6 +32,7 @@
           <th class="text-right">
             <v-icon>mdi-clock-outline</v-icon>
           </th>
+          <th class="text-right" />
         </tr>
       </thead>
       <tbody>
@@ -54,6 +55,13 @@
           <td>{{ moment(playlistTrack.added_at).format("DD MMM. YYYY") }}</td>
           <td class="text-right">
             {{ millisToMinutesAndSeconds(playlistTrack.track.duration_ms) }}
+          </td>
+          <td>
+            <v-btn
+              variant="flat"
+              icon="mdi-playlist-plus"
+              @click="addToQueue(playlistTrack.track.id)"
+            />
           </td>
         </tr>
       </tbody>
@@ -112,8 +120,12 @@ export default {
         });
     }
 
-    function playTrack(id){
+    function playTrack(id: string){
       api.playSpotifyTrack(id)
+    }
+
+    function addToQueue(trackID: string){
+      api.addToPlayerQueue([trackID])
     }
 
     onMounted(() => {
@@ -145,6 +157,7 @@ export default {
       ...toRefs(state),
       moment,
       playTrack,
+      addToQueue,
       millisToMinutesAndSeconds,
     }
   },

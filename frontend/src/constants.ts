@@ -1,5 +1,6 @@
 export const ROUTE_NAMES = {
   HOME: 'home',
   AUTHENTICATION: 'authentication',
-  PLAYLIST: 'playlist'
+  PLAYLIST: 'playlist',
+  QUEUE: 'queue',
 }

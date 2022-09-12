@@ -17,6 +17,8 @@ func (a *API) setupRoutes(e *gin.Engine) {
 	spotify.GET("/tracks/:id", a.GetSpotifyTrack)
 	spotify.PUT("/player/play/:id", a.PlaySpotifyTrack)
 	spotify.PUT("/player/control", a.ControlSpotifyPlayer)
+	spotify.POST("/player/queue", a.AddToPlayerQueue)
+	spotify.GET("/player/queue", a.GetPlayerQueue)
 
 	// authenticated only
 	// Authorization group

@@ -76,3 +76,8 @@ export interface SpotifyPlayerControl {
 	track_position_ms?: number,     
 	pause?: boolean    
 }
+
+export interface QueuedTrack {
+    track: SpotifyTrack
+    manually_added: boolean
+}

@@ -1,6 +1,6 @@
 import axios from 'axios'
 import { useAuthStore } from '@/plugins/store/auth'
-import { Account, AccountPatch, PlayerStatus, SpotifyPlayerControl, SpotifyPlaylist, SpotifyPlaylistsResult, SpotifyPlaylistTracksResult, SpotifyTrack } from '@/types'
+import { Account, AccountPatch, PlayerStatus, QueuedTrack, SpotifyPlayerControl, SpotifyPlaylist, SpotifyPlaylistsResult, SpotifyPlaylistTracksResult, SpotifyTrack } from '@/types'
 
 const apiClient = axios.create({
   // @ts-ignore
@@ -41,5 +41,8 @@ export default {
   getSpotifyPlaylistTracks: (playlistID: string) => apiClient.get<SpotifyPlaylistTracksResult>(`/spotify/playlists/${playlistID}/tracks`),
   getSpotifyTrack: (trackID: string) => apiClient.get<SpotifyTrack>(`/spotify/tracks/${trackID}`),
   playSpotifyTrack: (id:string) => apiClient.put(`/spotify/player/play/${id}`),
-  controlSpotifyPlayer: (control: SpotifyPlayerControl)=> apiClient.put<PlayerStatus>('/spotify/player/control', control)
+  controlSpotifyPlayer: (control: SpotifyPlayerControl)=> apiClient.put<PlayerStatus>('/spotify/player/control', control),
+  addToPlayerQueue: (tracksIDs: string[])=> apiClient.post('/spotify/player/queue', {tracksIDs}),
+  getPlayerQueue: ()=> apiClient.get<QueuedTrack[]>('/spotify/player/queue'),
+  removeFromPlayerQueue: (id: string)=> apiClient.delete(`/spotify/player/queue/${id}`)
 }

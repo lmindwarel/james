@@ -12,7 +12,7 @@
           :src="playerStore.currentTrack.album.images[0].url"
         />
         <v-icon size="100">
-          <mdi-music />
+          mdi-music
         </v-icon>
         <span v-if="playerStore.currentTrack">{{ playerStore.currentTrack.name }}</span>
       </div>
@@ -48,9 +48,18 @@
     </v-col>
 
     <v-col cols="2">
-      <v-slider
-        prepend-icon="mdi-volume-high"
-      />
+      <div class="d-flex align-center">
+        <v-btn
+          variant="flat"
+          href="/queue"
+          icon="mdi-menu"
+        />
+        <v-slider
+          density="compact"
+          hide-details
+          prepend-icon="mdi-volume-high"
+        />
+      </div>
     </v-col>
   </v-row>
 </template>
@@ -62,6 +71,8 @@ import { millisToMinutesAndSeconds } from "@/utils";
 import { PlayerStates, SpotifyPlayerControl } from "@/types";
 import api from "@/services/api";
 import _ from "lodash";
+
+const queueRoute = `${location.origin}/queue`
 
 export default {
   setup() {
@@ -114,6 +125,7 @@ export default {
       togglePlayerState,
       progressionText,
       trackDurationText,
+      queueRoute
     };
   },
 };

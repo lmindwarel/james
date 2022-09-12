@@ -35,6 +35,12 @@ type Player struct {
 	ctrl       *beep.Ctrl
 	resampler  *beep.Resampler
 	volume     *effects.Volume
+	queue      []QueuedTrack // sorted array
+}
+
+type QueuedTrack struct {
+	TrackID       ID
+	ManuallyAdded bool `json:"manually_added"`
 }
 
 type Listeners struct {

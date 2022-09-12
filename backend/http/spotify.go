@@ -127,3 +127,39 @@ func (a *API) ControlSpotifyPlayer(c *gin.Context) {
 
 	c.JSON(http.StatusOK, spotifySession.GetPlayerStatus())
 }
+
+func (a *API) AddToPlayerQueue(c *gin.Context) {
+	var toAdd struct {
+		TracksIDs []spotify.ID
+	}
+
+	err := c.BindJSON(&toAdd)
+	if err != nil {
+		c.AbortWithError(http.StatusBadRequest, errors.Wrap(err, "failed to parse json"))
+		return
+	}
+
+	spotifySession, err := a.ctrl.GetSpotifySession()
+	if err != nil {
+		c.AbortWithError(http.StatusNetworkAuthenticationRequired, err)
+	}
+
+	spotifySession.AddTracksToQueue(toAdd.TracksIDs, true)
+
+	c.Status(http.StatusOK)
+}
+
+func (a *API) GetPlayerQueue(c *gin.Context) {
+	spotifySession, err := a.ctrl.GetSpotifySession()
+	if err != nil {
+		c.AbortWithError(http.StatusNetworkAuthenticationRequired, err)
+	}
+
+	queuedTracks, err := spotifySession.GetPlayerQueue(c.Request.Context())
+	if err != nil {
+		c.AbortWithError(http.StatusInternalServerError, err)
+		return
+	}
+
+	c.JSON(http.StatusOK, queuedTracks)
+}
