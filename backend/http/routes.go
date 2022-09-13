@@ -19,6 +19,7 @@ func (a *API) setupRoutes(e *gin.Engine) {
 	spotify.PUT("/player/control", a.ControlSpotifyPlayer)
 	spotify.POST("/player/queue", a.AddToPlayerQueue)
 	spotify.GET("/player/queue", a.GetPlayerQueue)
+	spotify.DELETE("/player/queue/:trackID", a.DeleteTrackFromPlayerQueue)
 
 	// authenticated only
 	// Authorization group

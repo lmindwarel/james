@@ -125,30 +125,48 @@ func (s *Session) PlayTrack(id ID) error {
 	// 	return errors.Wrap(err, "failed to load decoder")
 	// }
 
-	fmt.Println("Setting up PortAudio stream...")
+	fmt.Println("Decoding stream...")
 	// fmt.Printf("PortAudio channels: %d / SampleRate: %f\n", info.Channels, info.SampleRate)
 
 	streamer, format, err := vorbis.Decode(audioFile)
 	if err != nil {
-		log.Fatal(err)
+		return errors.Wrap(err, "failed to decode audio file")
 	}
 
 	speaker.Lock()
+	fmt.Println("Setting up  stream...")
 	s.player.streamer = streamer
-	s.player.ctrl = &beep.Ctrl{Streamer: beep.Loop(-1, streamer)}
+	s.player.ctrl = &beep.Ctrl{Streamer: beep.Loop(1, streamer)}
 	s.player.resampler = beep.ResampleRatio(4, 1, s.player.ctrl)
 	s.player.volume = &effects.Volume{Streamer: s.player.resampler, Base: 2}
 	s.player.sampleRate = format.SampleRate
-	speaker.Unlock()
 
-	speaker.Init(format.SampleRate, format.SampleRate.N(time.Second/10))
-	speaker.Play(s.player.volume)
+	log.Debug("Initializing speaker")
+	// speaker.Clear()
+	log.Debug("Cleared")
+
+	err = speaker.Init(format.SampleRate, format.SampleRate.N(time.Second/10))
+	if err != nil {
+		return errors.Wrap(err, "failed to initialize speaker")
+	}
+	speaker.Play(beep.Seq(s.player.volume, beep.Callback(func() {
+		if s.player.TrackPosition >= s.player.TrackDuration && len(s.player.queue) > 0 {
+			// play next track in queue
+			err := s.PlayNextQueuedTrack()
+			if err != nil {
+				log.Errorf("failed to play next track: %s", err)
+			}
+		}
+	})))
 
 	s.player.CurrentTrackID = &id
-	s.player.TrackDuration = models.DurationMs(*track.Duration)
+	s.player.TrackDuration = models.DurationMs(time.Duration(*track.Duration) * time.Millisecond)
 	s.player.State = PlayerState(PlayerStatePlaying)
 	s.listeners.OnPlayerStatusChange(s.player.PlayerStatus)
 	s.StartPlayerListener()
+	speaker.Unlock()
+
+	log.Debug("Done!")
 
 	return nil
 }
@@ -180,6 +198,7 @@ func (s *Session) StartPlayerListener() {
 				speaker.Lock()
 				s.player.TrackPosition = models.DurationMs(s.player.sampleRate.D(s.player.streamer.Position()))
 				s.listeners.OnPlayerStatusChange(s.player.PlayerStatus)
+				log.Debugf("track position: %dms, duration: %dms", time.Duration(s.player.TrackPosition).Milliseconds(), time.Duration(s.player.TrackDuration).Milliseconds())
 				speaker.Unlock()
 
 				if s.player.State != PlayerState(PlayerStatePlaying) {
@@ -195,7 +214,7 @@ func (s *Session) SetTrackPosition(pos time.Duration) error {
 	speaker.Lock()
 	defer speaker.Unlock()
 
-	log.Debugf("SetTrackPosition: %d", pos.Seconds())
+	log.Debugf("SetTrackPosition: %fs", pos.Seconds())
 
 	newPos := s.player.sampleRate.N(pos)
 	log.Debugf("to sample: %d, duration: %d", newPos, s.player.streamer.Len())
@@ -203,12 +222,13 @@ func (s *Session) SetTrackPosition(pos time.Duration) error {
 	if newPos < 0 {
 		newPos = 0
 	}
-	trackDurationSamplesLen := s.player.sampleRate.N(time.Duration(s.player.TrackDuration))
+	trackDurationSamplesLen := s.player.streamer.Len()
+	log.Debugf("max track duration: %fs", s.player.sampleRate.D(trackDurationSamplesLen).Seconds())
 	if newPos >= trackDurationSamplesLen {
 		newPos = trackDurationSamplesLen - 1
 	}
 
-	log.Debugf("SetTrackPosition: %d", s.player.sampleRate.D(newPos).Seconds())
+	log.Debugf("SetTrackPosition: %fs", s.player.sampleRate.D(newPos).Seconds())
 
 	err := s.player.streamer.Seek(newPos)
 	if err != nil {

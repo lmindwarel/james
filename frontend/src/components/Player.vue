@@ -3,19 +3,27 @@
     justify="space-between"
     align="center"
   >
-    <v-col cols="2">
-      <div class="d-flex">
-        <v-img
-          v-if="playerStore.currentTrack"
-          aspect-ratio="1"
-          height="50"
-          :src="playerStore.currentTrack.album.images[0].url"
-        />
-        <v-icon size="100">
-          mdi-music
-        </v-icon>
-        <span v-if="playerStore.currentTrack">{{ playerStore.currentTrack.name }}</span>
-      </div>
+    <v-col cols="3">
+      <v-row align="center">
+        <v-col cols="3">
+          <v-img
+            v-if="playerStore.currentTrack"
+            :aspect-ratio="1"
+            width="100"
+            cover
+            :src="playerStore.currentTrack.album.images[0].url"
+          />
+          <v-icon
+            v-else
+            size="100"
+          >
+            mdi-music
+          </v-icon>
+        </v-col>
+        <v-col>
+          <span v-if="playerStore.currentTrack">{{ playerStore.currentTrack.name }}</span>
+        </v-col>
+      </v-row>
     </v-col>
 
     <v-col cols="4">
@@ -51,7 +59,7 @@
       <div class="d-flex align-center">
         <v-btn
           variant="flat"
-          href="/queue"
+          to="/queue"
           icon="mdi-menu"
         />
         <v-slider

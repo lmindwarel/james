@@ -28,6 +28,7 @@ const router = createRouter({
 
 router.beforeEach((to, from, next) => {
   if (!useAuthStore().isConnected && to.name !== ROUTE_NAMES.AUTHENTICATION) {
+    console.log("redirect to authentication")
     next({ name: ROUTE_NAMES.AUTHENTICATION })
   } else {
     next()

@@ -163,3 +163,12 @@ func (a *API) GetPlayerQueue(c *gin.Context) {
 
 	c.JSON(http.StatusOK, queuedTracks)
 }
+
+func (a *API) DeleteTrackFromPlayerQueue(c *gin.Context) {
+	spotifySession, err := a.ctrl.GetSpotifySession()
+	if err != nil {
+		c.AbortWithError(http.StatusNetworkAuthenticationRequired, err)
+	}
+
+	spotifySession.RemoveTracksFromQueue([]spotify.ID{spotify.ID(c.Param("id"))})
+}

@@ -12,6 +12,8 @@ func (s *Session) AddTracksToQueue(tracksIDs []ID, manual bool) {
 	for _, tID := range tracksIDs {
 		s.player.queue = append(s.player.queue, QueuedTrack{TrackID: tID, ManuallyAdded: manual})
 	}
+
+	log.Debugf("%d tracks queued", len(s.player.queue))
 }
 
 func (s *Session) RemoveTracksFromQueue(tracksIDs []ID) {
@@ -39,4 +41,19 @@ func (s *Session) GetPlayerQueue(ctx context.Context) (queuedTracks []models.Spo
 	}
 
 	return
+}
+
+func (s *Session) PlayNextQueuedTrack() error {
+	if len(s.player.queue) == 0 {
+		return errors.New("no queued tracks")
+	}
+
+	nextQueueTrack := s.player.queue[len(s.player.queue)-1]
+
+	err := s.PlayTrack(nextQueueTrack.TrackID)
+	if err != nil {
+		return errors.Wrap(err, "failed to play next track")
+	}
+
+	return nil
 }
