@@ -40,5 +40,10 @@ func Authenticate(clientID, clientSecret, userID, userSecret string) (session *S
 		librespotSession: librespotSession,
 		webapiClient:     webapiClient,
 		userID:           userID,
+		player: Player{
+			PlayerStatus: PlayerStatus{
+				CurrentQueueIndex: -1,
+			},
+		},
 	}, err
 }

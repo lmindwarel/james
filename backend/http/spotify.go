@@ -101,7 +101,7 @@ func (a *API) ControlSpotifyPlayer(c *gin.Context) {
 	log.Debugf("control: %v", control)
 
 	if control.Pause != nil {
-		if spotifySession.GetPlayerStatus().CurrentTrackID == nil {
+		if len(spotifySession.GetPlayer().GetQueue()) == 0 {
 			c.AbortWithError(http.StatusNotAcceptable, errors.New("no current track"))
 			return
 		}
@@ -113,7 +113,7 @@ func (a *API) ControlSpotifyPlayer(c *gin.Context) {
 	}
 
 	if control.TrackPositionMs != nil {
-		if spotifySession.GetPlayerStatus().CurrentTrackID == nil {
+		if len(spotifySession.GetPlayer().GetQueue()) == 0 {
 			c.AbortWithError(http.StatusNotAcceptable, errors.New("no current track"))
 			return
 		}
@@ -125,26 +125,16 @@ func (a *API) ControlSpotifyPlayer(c *gin.Context) {
 		}
 	}
 
-	c.JSON(http.StatusOK, spotifySession.GetPlayerStatus())
+	c.JSON(http.StatusOK, spotifySession.GetPlayer().GetStatus())
 }
 
 func (a *API) AddToPlayerQueue(c *gin.Context) {
-	var toAdd struct {
-		TracksIDs []spotify.ID
-	}
-
-	err := c.BindJSON(&toAdd)
-	if err != nil {
-		c.AbortWithError(http.StatusBadRequest, errors.Wrap(err, "failed to parse json"))
-		return
-	}
-
 	spotifySession, err := a.ctrl.GetSpotifySession()
 	if err != nil {
 		c.AbortWithError(http.StatusNetworkAuthenticationRequired, err)
 	}
 
-	spotifySession.AddTracksToQueue(toAdd.TracksIDs, true)
+	spotifySession.AddTrackToQueue(spotify.ID(c.Param("trackID")))
 
 	c.Status(http.StatusOK)
 }
@@ -170,5 +160,5 @@ func (a *API) DeleteTrackFromPlayerQueue(c *gin.Context) {
 		c.AbortWithError(http.StatusNetworkAuthenticationRequired, err)
 	}
 
-	spotifySession.RemoveTracksFromQueue([]spotify.ID{spotify.ID(c.Param("id"))})
+	spotifySession.RemoveTrackFromQueue(spotify.ID(c.Param("trackID")))
 }

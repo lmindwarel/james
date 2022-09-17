@@ -8,16 +8,25 @@ import (
 	"github.com/zmb3/spotify/v2"
 )
 
-func (s *Session) AddTracksToQueue(tracksIDs []ID, manual bool) {
-	for _, tID := range tracksIDs {
-		s.player.queue = append(s.player.queue, QueuedTrack{TrackID: tID, ManuallyAdded: manual})
+// AddTrackToQueue will add the track to the manual queue, moving all automatically queued tracks
+func (s *Session) AddTrackToQueue(trackID ID) {
+	insertAtIndex := -1
+	for queueIndex, queuedTracks := range s.player.queue {
+		if queuedTracks.ManuallyAdded {
+			continue
+		}
+
+		// Here we are after all manually queued tracks. Add the track here and move others
+		insertAtIndex = queueIndex
+		break
 	}
 
-	log.Debugf("%d tracks queued", len(s.player.queue))
+	s.player.QueueTrackAtIndex(insertAtIndex, QueuedTrack{TrackID: trackID, ManuallyAdded: true})
+	s.listeners.OnQueueChange(s.player.queue)
 }
 
-func (s *Session) RemoveTracksFromQueue(tracksIDs []ID) {
-
+func (s *Session) RemoveTrackFromQueue(trackID ID) {
+	// TODO
 }
 
 func (s *Session) GetPlayerQueue(ctx context.Context) (queuedTracks []models.SpotifyQueuedTrack, err error) {
@@ -43,17 +52,13 @@ func (s *Session) GetPlayerQueue(ctx context.Context) (queuedTracks []models.Spo
 	return
 }
 
-func (s *Session) PlayNextQueuedTrack() error {
-	if len(s.player.queue) == 0 {
-		return errors.New("no queued tracks")
+func (p *Player) QueueTrackAtIndex(index int, track QueuedTrack) {
+	if len(p.queue) < index {
+		p.queue = append(p.queue, track)
+		return
 	}
-
-	nextQueueTrack := s.player.queue[len(s.player.queue)-1]
-
-	err := s.PlayTrack(nextQueueTrack.TrackID)
-	if err != nil {
-		return errors.Wrap(err, "failed to play next track")
-	}
-
-	return nil
+	nextQueue := p.queue[index:]
+	p.queue = p.queue[:index]
+	p.queue = append(p.queue, track)
+	p.queue = append(p.queue, nextQueue...)
 }

@@ -1,10 +1,10 @@
 import { defineStore } from 'pinia'
-import { PlayerStates, PlayerStatus, SpotifyTrack } from '@/types'
+import { PlayerStates, PlayerStatus, QueuedTrack, SpotifyTrack } from '@/types'
 import api from '@/services/api'
 
 export const usePlayerStore = defineStore('player', {
   state: () => ({
-    queue: [] as SpotifyTrack,
+    queue: [] as QueuedTrack[],
     state: PlayerStates.Stopped as PlayerStates,
     track_position: 0 as number,
     currentTrack: null as SpotifyTrack | null

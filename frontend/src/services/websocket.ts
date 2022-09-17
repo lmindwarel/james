@@ -1,5 +1,5 @@
 import { usePlayerStore } from "@/plugins/store/player";
-import { PlayerStatus, WebsocketMessage } from "@/types";
+import { PlayerStatus, QueuedTrack, SpotifyTrack, WebsocketMessage } from "@/types";
 
 // @ts-ignore
 const address = `${import.meta.env.VITE_JAMES_API_ADDRESS.replace('http', 'ws')}/ws`
@@ -19,12 +19,16 @@ websocket.onerror = function (err) {
     console.error("failed to connect to the websocket server", err)
 }
 
-function handleMessage(message: WebsocketMessage){
-    switch(message.topic){
+function handleMessage(message: WebsocketMessage) {
+    const playerStore = usePlayerStore()
+    switch (message.topic) {
         case "player-status":
-            console.log(message.data)
-            const playerStore = usePlayerStore()
             playerStore.updateFromPlayerStatus(message.data as PlayerStatus)
+            break
+
+        case "player-queue":
+            playerStore.queue = message.data as QueuedTrack[]
+            break
 
         default:
             console.warn("Unknown message topic: " + message.topic)

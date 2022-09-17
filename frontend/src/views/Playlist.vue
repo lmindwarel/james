@@ -57,7 +57,11 @@
             {{ millisToMinutesAndSeconds(playlistTrack.track.duration_ms) }}
           </td>
           <td>
+            <v-icon v-if="playerStore.queue.some(t => t.id == playlistTrack.track.id)">
+              mdi-playlist-check
+            </v-icon>
             <v-btn
+              v-else
               variant="flat"
               icon="mdi-playlist-plus"
               @click="addToQueue(playlistTrack.track.id)"
@@ -76,9 +80,12 @@ import { useRoute } from "vue-router";
 import api from "@/services/api";
 import { millisToMinutesAndSeconds } from "@/utils";
 import moment from 'moment'
+import { usePlayerStore } from '@/plugins/store/player';
 
 export default {
   setup() {
+    let playerStore = usePlayerStore()
+
     const state = reactive({
       tracks: [] as SpotifyPlaylistTrack[],
       loading: {
@@ -157,6 +164,7 @@ export default {
       ...toRefs(state),
       moment,
       playTrack,
+      playerStore,
       addToQueue,
       millisToMinutesAndSeconds,
     }

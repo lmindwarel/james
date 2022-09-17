@@ -43,6 +43,14 @@ func (a *API) wshandler(c *gin.Context) {
 				Data:  s,
 			})
 		})
+
+		spotifySession.ListenOnPlayerQueueChange(func(q []spotify.QueuedTrack) {
+			// TODO only send from -10 in queue position
+			conn.WriteJSON(OutWebsocketMessage{
+				Topic: "player-queue",
+				Data:  q,
+			})
+		})
 	}
 
 	ticker := time.NewTicker(100 * time.Millisecond)

@@ -35,6 +35,10 @@ export interface SpotifyTrack {
     duration_ms: number
 }
 
+export interface PlayerQueuedTrack {
+    track_id: string,
+    manually_added: boolean,}
+
 export interface SpotifyPlaylistTracksResult extends SpotifyPagination {
     items: SpotifyPlaylistTrack[]
 }

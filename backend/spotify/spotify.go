@@ -22,10 +22,10 @@ const (
 )
 
 type PlayerStatus struct {
-	State          PlayerState       `json:"state"`
-	CurrentTrackID *ID               `json:"current_track_id"`
-	TrackDuration  models.DurationMs `json:"track_duration"`
-	TrackPosition  models.DurationMs `json:"track_position"`
+	State             PlayerState       `json:"state"`
+	CurrentQueueIndex int               `json:"current_queue_index"`
+	TrackDuration     models.DurationMs `json:"track_duration"`
+	TrackPosition     models.DurationMs `json:"track_position"`
 }
 
 type Player struct {
@@ -39,12 +39,13 @@ type Player struct {
 }
 
 type QueuedTrack struct {
-	TrackID       ID
+	TrackID       ID   `json:"track_id"`
 	ManuallyAdded bool `json:"manually_added"`
 }
 
 type Listeners struct {
 	OnPlayerStatusChange func(s PlayerStatus)
+	OnQueueChange        func(queue []QueuedTrack)
 }
 
 type Session struct {
@@ -59,6 +60,18 @@ func (s *Session) ListenOnPlayerStatusChange(listener func(s PlayerStatus)) {
 	s.listeners.OnPlayerStatusChange = listener
 }
 
-func (s *Session) GetPlayerStatus() PlayerStatus {
-	return s.player.PlayerStatus
+func (s *Session) ListenOnPlayerQueueChange(listener func(queue []QueuedTrack)) {
+	s.listeners.OnQueueChange = listener
+}
+
+func (s *Session) GetPlayer() *Player {
+	return &s.player
+}
+
+func (p *Player) GetQueue() []QueuedTrack {
+	return p.queue
+}
+
+func (p *Player) GetStatus() PlayerStatus {
+	return p.PlayerStatus
 }

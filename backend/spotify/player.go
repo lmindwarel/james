@@ -89,8 +89,22 @@ import (
 // }
 
 func (s *Session) PlayTrack(id ID) error {
+	s.player.QueueTrackAtIndex(s.player.CurrentQueueIndex+1, QueuedTrack{TrackID: id, ManuallyAdded: true})
+	s.listeners.OnQueueChange(s.player.queue)
+	return s.PlayNextQueuedTrack()
+}
+
+func (s *Session) PlayNextQueuedTrack() error {
+	if len(s.player.queue) <= s.player.CurrentQueueIndex+1 {
+		return errors.New("no queued tracks")
+	}
+
+	s.player.CurrentQueueIndex += 1
+
+	queuedTrack := s.player.queue[s.player.CurrentQueueIndex]
+
 	// Get the track metadata: it holds information about which files and encodings are available
-	track, err := s.librespotSession.Mercury().GetTrack(utils.Base62ToHex(string(id)))
+	track, err := s.librespotSession.Mercury().GetTrack(utils.Base62ToHex(string(queuedTrack.TrackID)))
 	if err != nil {
 		return errors.Wrap(err, "failed to load track")
 	}
@@ -141,16 +155,19 @@ func (s *Session) PlayTrack(id ID) error {
 	s.player.volume = &effects.Volume{Streamer: s.player.resampler, Base: 2}
 	s.player.sampleRate = format.SampleRate
 
-	log.Debug("Initializing speaker")
+	log.Debug("Initializing speaker...")
 	// speaker.Clear()
-	log.Debug("Cleared")
+	// log.Debug("Cleared")
 
 	err = speaker.Init(format.SampleRate, format.SampleRate.N(time.Second/10))
 	if err != nil {
 		return errors.Wrap(err, "failed to initialize speaker")
 	}
+
+	log.Debug("ok")
+
 	speaker.Play(beep.Seq(s.player.volume, beep.Callback(func() {
-		if s.player.TrackPosition >= s.player.TrackDuration && len(s.player.queue) > 0 {
+		if len(s.player.queue) > s.player.CurrentQueueIndex {
 			// play next track in queue
 			err := s.PlayNextQueuedTrack()
 			if err != nil {
@@ -159,7 +176,6 @@ func (s *Session) PlayTrack(id ID) error {
 		}
 	})))
 
-	s.player.CurrentTrackID = &id
 	s.player.TrackDuration = models.DurationMs(time.Duration(*track.Duration) * time.Millisecond)
 	s.player.State = PlayerState(PlayerStatePlaying)
 	s.listeners.OnPlayerStatusChange(s.player.PlayerStatus)

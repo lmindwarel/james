@@ -17,7 +17,7 @@ func (a *API) setupRoutes(e *gin.Engine) {
 	spotify.GET("/tracks/:id", a.GetSpotifyTrack)
 	spotify.PUT("/player/play/:id", a.PlaySpotifyTrack)
 	spotify.PUT("/player/control", a.ControlSpotifyPlayer)
-	spotify.POST("/player/queue", a.AddToPlayerQueue)
+	spotify.POST("/player/queue/:trackID", a.AddToPlayerQueue)
 	spotify.GET("/player/queue", a.GetPlayerQueue)
 	spotify.DELETE("/player/queue/:trackID", a.DeleteTrackFromPlayerQueue)
 
