@@ -88,3 +88,7 @@ func (ds *Datastore) ExistInCache(key string) bool {
 	_, found := ds.cache.Get(key)
 	return found
 }
+
+func (ds *Datastore) IsNotFoundError(err error) bool {
+	return errors.Is(err, ErrNotFound)
+}

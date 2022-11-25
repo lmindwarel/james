@@ -44,6 +44,10 @@
         </v-icon>
         {{ authStore.connectedAccount?.name }}
       </v-btn>
+      <v-btn
+        icon="mdi-cog"
+        :to="{name: $constants.ROUTE_NAMES.SETTINGS}"
+      />
     </v-app-bar>
 
     <v-navigation-drawer

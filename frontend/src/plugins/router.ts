@@ -7,6 +7,7 @@ const router = createRouter({
   routes: [
     { path: '/', redirect: '/home' },
     { path: '/home', name: ROUTE_NAMES.HOME, component: () => import('@/views/Home.vue') },
+    { path: '/settings', name: ROUTE_NAMES.SETTINGS, component: () => import('@/views/Settings.vue') },
     {
       path: '/authentication',
       name: ROUTE_NAMES.AUTHENTICATION,

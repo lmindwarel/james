@@ -2,7 +2,7 @@
   <div class="fill-height d-flex flex-column justify-center align-center">
     <div class="d-flex flex-column justify-center align-center mb-12">
       <v-icon
-        size="150"
+        size="300"
         class="mb-4"
       >
         mdi-robot-excited-outline
@@ -11,10 +11,11 @@
     </div>
     <v-card
       width="600"
-      height="300"
+      max-height="300"
+      class="overflow-y-auto"
     >
       <v-card-title>
-        Comptes
+        Connexion
       </v-card-title>
       <v-window v-model="page">
         <v-window-item>
@@ -39,7 +40,7 @@
               </v-list-item-avatar>
               <v-list-item-header>
                 <v-list-item-title>
-                  Ajouter un compte
+                  Créer un compte
                 </v-list-item-title>
               </v-list-item-header>
             </v-list-item>

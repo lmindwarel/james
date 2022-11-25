@@ -13,6 +13,15 @@ import (
 	"github.com/lmindwarel/james/backend/models"
 	jamesUtils "github.com/lmindwarel/james/backend/utils"
 	"github.com/pkg/errors"
+	"github.com/xlab/portaudio-go/portaudio"
+)
+
+const (
+	samplesPerChannel = 2048
+	// The samples bit depth
+	bitDepth = 16
+	// The samples format
+	sampleFormat = portaudio.PaFloat32
 )
 
 // func (s *Session) PlayTrack(id ID) error {
@@ -244,7 +253,7 @@ func (s *Session) SetTrackPosition(pos time.Duration) error {
 		newPos = trackDurationSamplesLen - 1
 	}
 
-	log.Debugf("SetTrackPosition: %fs", s.player.sampleRate.D(newPos).Seconds())
+	log.Debugf("SetTrackPosition to %d seconds (%d)", s.player.sampleRate.D(newPos).Seconds(), newPos)
 
 	err := s.player.streamer.Seek(newPos)
 	if err != nil {

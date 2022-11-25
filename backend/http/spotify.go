@@ -10,6 +10,60 @@ import (
 	"github.com/pkg/errors"
 )
 
+func (a *API) GetSpotifyCredentials(c *gin.Context) {
+	credentials, err := a.ds.GetSpotifyCredentials()
+	if err != nil {
+		c.AbortWithError(http.StatusInternalServerError, err)
+		return
+	}
+
+	c.JSON(http.StatusOK, credentials)
+}
+
+func (a *API) CreateSpotifyCredential(c *gin.Context) {
+	var credential models.CredentialPatch
+	err := c.ShouldBindJSON(&credential)
+	if err != nil {
+		c.AbortWithError(http.StatusBadRequest, err)
+		return
+	}
+
+	spotifyCredential, err := a.ctrl.CreateSpotifyCredential(credential)
+	if err != nil {
+		c.AbortWithError(http.StatusInternalServerError, err)
+		return
+	}
+
+	c.JSON(http.StatusOK, spotifyCredential)
+}
+
+func (a *API) PatchSpotifyCredential(c *gin.Context) {
+	var patch models.CredentialPatch
+	err := c.ShouldBindJSON(&patch)
+	if err != nil {
+		c.AbortWithError(http.StatusBadRequest, err)
+		return
+	}
+
+	credential, err := a.ds.GetSpotifyCredential(models.UUID(c.Param("id")))
+	if err != nil {
+		if a.ds.IsNotFoundError(err) {
+			c.AbortWithStatus(http.StatusNotFound)
+		} else {
+			c.AbortWithError(http.StatusInternalServerError, err)
+		}
+		return
+	}
+
+	spotifyCredential, err := a.ctrl.PatchSpotifyCredential(credential, patch)
+	if err != nil {
+		c.AbortWithError(http.StatusInternalServerError, err)
+		return
+	}
+
+	c.JSON(http.StatusOK, spotifyCredential)
+}
+
 func (a *API) GetSpotifyPlaylists(c *gin.Context) {
 	spotifySession, err := a.ctrl.GetSpotifySession()
 	if err != nil {

@@ -3,4 +3,5 @@ export const ROUTE_NAMES = {
   AUTHENTICATION: 'authentication',
   PLAYLIST: 'playlist',
   QUEUE: 'queue',
+  SETTINGS: 'settings'
 }

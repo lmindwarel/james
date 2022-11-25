@@ -1,8 +1,5 @@
 package models
 
-// CollAccount is the collection name for accounts
-const CollAccounts = "accounts"
-
 // Account store infomations about a quizzbox account
 type Account struct {
 	BaseModel `bson:",inline"`
@@ -23,7 +20,8 @@ type AccountPatch struct {
 const SpotifyPasswordHashKey = "example key 1234"
 const SpotifyDeviceName = "James"
 
-type SpotifyCredentials struct {
+type SpotifyCredential struct {
+	BaseModel      `bson:",inline"`
 	User           string `json:"user"`
 	HashedPassword string `json:"hashedPassword"`
 }

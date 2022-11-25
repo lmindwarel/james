@@ -14,9 +14,9 @@ import (
 func Authenticate(clientID, clientSecret, userID, userSecret string) (session *Session, err error) {
 	ctx := context.Background()
 
-	log.Debugf("userID: %s, userSecret: %s", userID, userSecret)
-
 	// web api
+	log.Debugf("Authenticating to web api...")
+
 	config := &clientcredentials.Config{
 		ClientID:     clientID,
 		ClientSecret: clientSecret,
@@ -31,10 +31,14 @@ func Authenticate(clientID, clientSecret, userID, userSecret string) (session *S
 	webapiClient := spotify.New(httpClient)
 
 	// librespot
+	log.Debugf("Authenticating mercury...")
+
 	librespotSession, err := librespot.Login(userID, userSecret, models.SpotifyDeviceName)
 	if err != nil {
 		return session, errors.Wrap(err, "failed to authenticate to Spotify")
 	}
+
+	log.Debugf("Authentication complete")
 
 	return &Session{
 		librespotSession: librespotSession,

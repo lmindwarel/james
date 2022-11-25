@@ -1,4 +1,8 @@
-import { Moment } from 'moment'
+export interface BaseModel{
+    id: string
+    date_created: string
+    date_updated: string
+}
 
 export interface Account {
     id: string,
@@ -18,6 +22,15 @@ export interface SpotifyPagination {
 }
 export interface SpotifyPlaylistsResult extends SpotifyPagination {
     items: SpotifyPlaylist[]
+}
+
+export interface SpotifyCredential extends BaseModel {
+	user: string
+}
+
+export interface CredentialPatch {
+	user?: string
+    password?: string
 }
 
 export interface SpotifyPlaylist {
