@@ -7,6 +7,18 @@ import (
 	"github.com/pkg/errors"
 )
 
+func (ctrl *Controller) GetSpotifySession() (*spotify.Session, error) {
+	if ctrl.spotifySession == nil {
+		return nil, errors.New("spotify not connected")
+	}
+
+	return ctrl.spotifySession, nil
+}
+
+func (ctrl *Controller) IsSpotifyConnected() bool {
+	return ctrl.spotifySession != nil
+}
+
 func (ctrl *Controller) CreateSpotifyCredential(payload models.CredentialPatch) (credential models.SpotifyCredential, err error) {
 	if payload.User == nil || payload.Password == nil {
 		return credential, models.ErrBadParameter

@@ -10,6 +10,13 @@ import (
 	"github.com/pkg/errors"
 )
 
+func (a *API) SpotifyConnectedMiddleware(c *gin.Context) {
+	if !a.ctrl.IsSpotifyConnected() {
+		c.AbortWithStatus(http.StatusPreconditionRequired)
+		return
+	}
+}
+
 func (a *API) GetSpotifyCredentials(c *gin.Context) {
 	credentials, err := a.ds.GetSpotifyCredentials()
 	if err != nil {

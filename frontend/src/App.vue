@@ -153,8 +153,6 @@ export default {
         });
     }
 
-    onMounted(fetchSpotifyPlaylists);
-
     // Manage events
     eventbus.on(
       "notify",

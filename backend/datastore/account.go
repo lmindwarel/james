@@ -6,6 +6,7 @@ import (
 	models "github.com/lmindwarel/james/backend/models"
 	"github.com/pkg/errors"
 	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/mongo"
 )
 
 // CollAccount is the collection name for accounts
@@ -19,8 +20,12 @@ func (ds *Datastore) GetAccount(id models.UUID) (account models.Account, err err
 
 // GetAccounts all accounts
 func (ds *Datastore) GetAccounts() (accounts []models.Account, err error) {
-	cursor, err := ds.db.Collection(CollAccounts).Find(context.Background(), nil)
+	cursor, err := ds.db.Collection(CollAccounts).Find(context.Background(), bson.M{})
 	if err != nil {
+		if errors.Is(err, mongo.ErrNilDocument) {
+			return []models.Account{}, nil
+		}
+
 		return accounts, errors.Wrap(err, "failed to query accounts")
 	}
 

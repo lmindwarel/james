@@ -5,12 +5,15 @@ import (
 )
 
 func (a *API) setupRoutes(e *gin.Engine) {
-
 	// public router
 	e.GET("/ws", a.wshandler)
 	e.GET("/accounts", a.GetAccounts)
 	e.POST("/accounts", a.PostAccount)
-	spotify := e.Group("/spotify")
+
+	// authenticated only
+	// Authorization group
+	authenticated := e.Group("/")
+	spotify := authenticated.Group("/spotify")
 	spotify.GET("/credentials", a.GetSpotifyCredentials)
 	spotify.POST("/credentials", a.CreateSpotifyCredential)
 	spotify.PATCH("/credentials/:id", a.PatchSpotifyCredential)
@@ -24,9 +27,6 @@ func (a *API) setupRoutes(e *gin.Engine) {
 	spotify.GET("/player/queue", a.GetPlayerQueue)
 	spotify.DELETE("/player/queue/:trackID", a.DeleteTrackFromPlayerQueue)
 
-	// authenticated only
-	// Authorization group
-	authenticated := e.Group("/")
 	// per group middleware! in this case we use the custom created
 	// AuthRequired() middleware just in the "authorized" group.
 	authenticated.Use(a.AuthenticatedMiddleware())

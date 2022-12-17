@@ -49,6 +49,10 @@ func main() {
 	}
 	fmt.Printf("ok\n")
 
+	configJSON, _ := json.MarshalIndent(config, "    ", "    ")
+
+	fmt.Printf("config file: %s", configJSON)
+
 	fmt.Printf("Initialize logger...")
 	utils.InitLogger(config.LogPath)
 	fmt.Printf("ok\n")

@@ -7,6 +7,7 @@ import (
 	"time"
 
 	models "github.com/lmindwarel/james/backend/models"
+	"github.com/lmindwarel/james/backend/utils"
 	"github.com/pkg/errors"
 
 	cache "github.com/patrickmn/go-cache"
@@ -14,12 +15,14 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
+var log = utils.GetLogger("datastore")
+
 // Config is the configuration for the datastore
 type Config struct {
-	Username string
-	Password string
-	Name     string
-	Hosts    []string
+	Username string   `json:"username"`
+	Password string   `json:"password"`
+	Name     string   `json:"name"`
+	Hosts    []string `json:"hosts"`
 }
 
 // Datastore manage all the data in project
@@ -42,6 +45,7 @@ func New(config Config) (*Datastore, error) {
 		}
 	}
 	url := fmt.Sprintf("mongodb://%s%s/%s", loginURL, strings.Join(config.Hosts, ","), config.Name)
+	log.Debugf("Connecting to database %s", url)
 
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
