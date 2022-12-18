@@ -23,27 +23,15 @@
             <v-list-item
               v-for="account in accounts"
               :key="account.id"
+              :prepend-icon="account.icon || 'mdi-account'"
+              :title="account.name"
               @click="login(account)"
-            >
-              <v-list-item-avatar start>
-                <v-icon>{{ account.icon || 'mdi-account' }}</v-icon> 
-              </v-list-item-avatar>
-              <v-list-item-header>
-                <v-list-item-title>
-                  {{ account.name }}
-                </v-list-item-title>
-              </v-list-item-header>
-            </v-list-item>
-            <v-list-item @click="page = 1">
-              <v-list-item-avatar start>
-                <v-icon>mdi-account-plus</v-icon>
-              </v-list-item-avatar>
-              <v-list-item-header>
-                <v-list-item-title>
-                  Créer un compte
-                </v-list-item-title>
-              </v-list-item-header>
-            </v-list-item>
+            />
+            <v-list-item
+              prepend-icon="mdi-account-plus"
+              title=" Créer un compte"
+              @click="page = 1"
+            />
           </v-list>
         </v-window-item>
         <v-window-item>

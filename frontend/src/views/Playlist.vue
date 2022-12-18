@@ -84,7 +84,7 @@ import { usePlayerStore } from '@/plugins/store/player';
 
 export default {
   setup() {
-    let playerStore = usePlayerStore()
+    const playerStore = usePlayerStore()
 
     const state = reactive({
       tracks: [] as SpotifyPlaylistTrack[],

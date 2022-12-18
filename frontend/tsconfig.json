@@ -4,7 +4,6 @@
     "module": "esnext",
     "strict": true,
     "importHelpers": true,
-    // "noImplicitThis": false,
     "moduleResolution": "node",
     "baseUrl": ".",
     "paths": {
@@ -23,7 +22,7 @@
     "src/**/*.tsx",
     "src/**/*.vue",
     "tests/**/*.ts",
-    "tests/**/*.tsx"
+    "tests/**/*.tsx",
   ],
   "exclude": [
     "node_modules"

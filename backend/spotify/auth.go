@@ -35,7 +35,7 @@ func Authenticate(clientID, clientSecret, userID, userSecret string) (session *S
 
 	librespotSession, err := librespot.Login(userID, userSecret, models.SpotifyDeviceName)
 	if err != nil {
-		return session, errors.Wrap(err, "failed to authenticate to Spotify")
+		return session, errors.Wrap(models.ErrAuthenticationFailed, err.Error())
 	}
 
 	log.Debugf("Authentication complete")

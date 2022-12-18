@@ -86,6 +86,7 @@ export interface PlayerStatus {
     current_track_id: string
 	track_duration: number
 	track_position: number
+    current_credentials_id: string | null
 }
 
 export interface SpotifyPlayerControl {

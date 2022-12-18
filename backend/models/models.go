@@ -10,7 +10,7 @@ import (
 type UUID string
 
 type BaseModel struct {
-	ID UUID `bson:"_id"`
+	ID UUID `json:"id" bson:"_id"`
 	// DateCreated is the date when the object was created
 	DateCreated time.Time `json:"dateCreated,omitempty" bson:"dateCreated"`
 	// DateModified is the date when the object was updated

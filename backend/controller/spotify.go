@@ -67,6 +67,8 @@ func (ctrl *Controller) AuthenticateSpotify(credentials models.SpotifyCredential
 		return errors.Wrap(err, "failed to decrypt password")
 	}
 
+	log.Infof("authenticating user %s to Spotify with password %s", credentials.User, password)
+
 	ctrl.spotifySession, err = spotify.Authenticate(ctrl.config.SpotifyClientID, ctrl.config.SpotifyClientSecret, credentials.User, password)
 	if err != nil {
 		return errors.Wrap(err, "failed to authenticate to spotify")

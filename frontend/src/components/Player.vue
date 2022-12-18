@@ -84,7 +84,7 @@ const queueRoute = `${location.origin}/queue`
 
 export default {
   setup() {
-    let playerStore = usePlayerStore();
+    const playerStore = usePlayerStore();
 
     const controlDebouced = _.debounce((control: SpotifyPlayerControl) => {
       api.controlSpotifyPlayer(control).then(res => {
@@ -92,7 +92,7 @@ export default {
       });
     }, 400);
 
-    let progression = computed({
+    const progression = computed({
       get() {
         return playerStore.currentTrack
           ? (playerStore.track_position / playerStore.currentTrack?.duration_ms) * 100
@@ -109,10 +109,10 @@ export default {
       },
     });
 
-    let progressionText = computed(() =>
+    const progressionText = computed(() =>
       millisToMinutesAndSeconds(playerStore.track_position)
     );
-    let trackDurationText = computed(() =>
+    const trackDurationText = computed(() =>
       playerStore.currentTrack
         ? millisToMinutesAndSeconds(playerStore.currentTrack.duration_ms)
         : "0:00"

@@ -71,6 +71,31 @@ func (a *API) PatchSpotifyCredential(c *gin.Context) {
 	c.JSON(http.StatusOK, spotifyCredential)
 }
 
+func (a *API) AuthenticateSpotifyCredential(c *gin.Context) {
+	credential, err := a.ds.GetSpotifyCredential(models.UUID(c.Param("id")))
+	if err != nil {
+		if a.ds.IsNotFoundError(err) {
+			c.AbortWithStatus(http.StatusNotFound)
+		} else {
+			c.AbortWithError(http.StatusInternalServerError, err)
+		}
+		return
+	}
+
+	err = a.ctrl.AuthenticateSpotify(credential)
+	if err != nil {
+		if errors.Is(err, models.ErrAuthenticationFailed) {
+			c.AbortWithError(http.StatusForbidden, err)
+			return
+
+		}
+		c.AbortWithError(http.StatusInternalServerError, err)
+		return
+	}
+
+	c.JSON(http.StatusNoContent, nil)
+}
+
 func (a *API) GetSpotifyPlaylists(c *gin.Context) {
 	spotifySession, err := a.ctrl.GetSpotifySession()
 	if err != nil {

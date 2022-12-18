@@ -102,7 +102,6 @@
       app
       elevation="2"
       class="ml-0"
-      style="width: 100%; z-index: 2000"
     >
       <player />
     </v-footer>

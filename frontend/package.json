@@ -18,14 +18,16 @@
     "roboto-fontface": "*",
     "vue": "^3.2.45",
     "vue-router": "^4.1.6",
-    "vuetify": "^3.0.0-beta.0",
+    "vuetify": "^3.0.5",
     "webfontloader": "^1.6.28"
   },
   "devDependencies": {
     "@typescript-eslint/eslint-plugin": "^5.46.1",
     "@typescript-eslint/parser": "^5.46.1",
+    "@vitejs/plugin-vue": "^4.0.0",
     "@vue/cli-plugin-eslint": "~5.0.8",
     "@vue/cli-plugin-router": "~5.0.8",
+    "@vue/eslint-config-standard": "^8.0.1",
     "@vue/eslint-config-typescript": "^11.0.2",
     "eslint": "^8.30.0",
     "eslint-plugin-import": "^2.26.0",

@@ -52,8 +52,11 @@ func (ds *Datastore) UpsertAccount(account models.Account) (models.Account, erro
 const CollSpotifyCredentials = "spotify_credentials"
 
 func (ds *Datastore) GetSpotifyCredentials() (credentials []models.SpotifyCredential, err error) {
-	cursor, err := ds.db.Collection(CollSpotifyCredentials).Find(context.Background(), nil)
+	cursor, err := ds.db.Collection(CollSpotifyCredentials).Find(context.Background(), bson.M{})
 	if err != nil {
+		if errors.Is(err, mongo.ErrNilDocument) {
+			return []models.SpotifyCredential{}, nil
+		}
 		return credentials, errors.Wrap(err, "failed to query credentials")
 	}
 
@@ -71,7 +74,7 @@ func (ds *Datastore) UpsertSpotifyCredential(credentials models.SpotifyCredentia
 	var err error
 	if models.EmptyUUID(credentials.ID) {
 		credentials.BaseModel = models.NewBaseModel()
-		_, err = ds.db.Collection(CollAccounts).InsertOne(context.Background(), credentials)
+		_, err = ds.db.Collection(CollSpotifyCredentials).InsertOne(context.Background(), credentials)
 	} else {
 		credentials.BaseModel.Update()
 		_, err = ds.db.Collection(CollSpotifyCredentials).ReplaceOne(context.Background(), bson.M{"_id": credentials.ID}, credentials)

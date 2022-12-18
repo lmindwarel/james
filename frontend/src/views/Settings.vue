@@ -6,36 +6,71 @@ import { reactive } from 'vue';
         Paramètres
       </h1>
 
-      <div>
-        <h3 class="text-h3">
-          Comptes spotify
-        </h3>
-        <v-list>
-          <v-list-item
-            v-for="credential in spotifyCredentials"
-            :key="credential.id"
-            :title="credential.user"
+      <v-row>
+        <v-col cols="6">
+          <v-card
+            class="my-8"
+            variant="outlined"
           >
-            <template #prepend>
-              <v-avatar :color="file.color">
-                <v-btn
-                  icon="mdi-pencil"
-                  @click="editCredential(credential)"
-                />
-              </v-avatar>
-            </template>
-          </v-list-item>
-          <v-list-item
-            append-icon="mdi-account-plus"
-            title="Nouveau compte Spotify"
-            @click="newCredential"
-          />
-        </v-list>
-      </div>
+            <v-card-title class="d-flex justify-space-between">
+              <span>Comptes Spotify</span>
+              <v-btn
+                append-icon="mdi-account-plus"
+                variant="text"
+                @click="newCredential"
+              >
+                Ajouter
+              </v-btn>
+            </v-card-title>
+              
+            <v-list>
+              <v-list-item
+                v-for="credential in spotifyCredentials"
+                :key="credential.id"
+                :title="credential.user"
+              >
+                <template #prepend>
+                  <v-sheet
+                    width="100px"
+                    color="transparent"
+                    class="d-flex justify-center"
+                  >
+                    <v-progress-circular
+                      v-if="authenticating_credential_id == credential.id"
+                      indeterminate
+                    />
+                    <v-icon v-else-if="playerStore.current_credentials_id == credential.id">
+                      mdi-circle
+                    </v-icon>
+                    <v-btn
+                      v-else
+                      variant="icon"
+                      icon="mdi-login"
+                      @click="useCredential(credential.id)"
+                    />
+                  </v-sheet>
+                </template>
+
+                <template #append>
+                  <v-avatar>
+                    <v-btn
+                      icon="mdi-pencil"
+                      @click="editCredential(credential)"
+                    />
+                  </v-avatar>
+                </template>
+              </v-list-item>
+            </v-list>
+          </v-card>
+        </v-col>
+      </v-row>
     </div>
 
-    <v-dialog v-model="dialogs.editSpotifyCredential.visible">
-      <v-card>
+    <v-dialog
+      v-model="dialogs.editSpotifyCredential.visible"
+      width="unset"
+    >
+      <v-card min-width="500">
         <v-card-title>{{ dialogs.editSpotifyCredential.id ? 'Éditer' : 'Créer' }} un accès Spotify</v-card-title>
         <v-card-text>
           <v-form ref="editSpotifyCredentialForm">
@@ -45,6 +80,7 @@ import { reactive } from 'vue';
             />
             <v-text-field
               v-model="dialogs.editSpotifyCredential.password"
+              type="password"
               label="Mot de passe"
             />
           </v-form>
@@ -70,15 +106,20 @@ import { reactive } from 'vue';
 </template>
 
 <script lang="ts">
-import { reactive, ref, toRefs } from "vue";
+import { onMounted, reactive, ref, toRefs } from "vue";
 import { CredentialPatch, SpotifyCredential } from "@/types";
-import { VForm } from "vuetify/lib";
-import api from "@/services/api";
+import { VForm } from "vuetify/components";
+import api from "../services/api";
+import { usePlayerStore } from "@/plugins/store/player";
+import eventbus from "@/services/eventbus";
 
 export default {
   setup() {
+    const playerStore = usePlayerStore();
+
     const state = reactive({
       spotifyCredentials: [] as SpotifyCredential[],
+      authenticating_credential_id: null as string | null,
       dialogs: {
         editSpotifyCredential: {
           visible: false,
@@ -92,6 +133,14 @@ export default {
 
     const editSpotifyCredentialForm = ref(VForm);
 
+    onMounted(fetchSpotifyCredentials);
+
+    function fetchSpotifyCredentials() {
+      api.getSpotifyCredentials().then((res) => {
+        state.spotifyCredentials = res.data;
+      });
+    }
+
     function newCredential() {
       state.dialogs.editSpotifyCredential.visible = true;
     }
@@ -102,16 +151,22 @@ export default {
       state.dialogs.editSpotifyCredential.visible = true;
     }
 
-    function saveCredential() {
-      state.dialogs.editSpotifyCredential.saving = true;
+    function closeEditSpotifyCredentialDialog() {
+      state.dialogs.editSpotifyCredential.visible = false;
+      state.dialogs.editSpotifyCredential.id = null;
+      state.dialogs.editSpotifyCredential.user = null;
+    }
 
+    function saveEditSpotifyCredentialDialog() {
       if (!editSpotifyCredentialForm.value?.validate()) {
         return;
       }
 
+      state.dialogs.editSpotifyCredential.saving = true;
+
       let requestPromise;
       if (state.dialogs.editSpotifyCredential.id) {
-        let patch = {} as CredentialPatch;
+        const patch = {} as CredentialPatch;
         if (state.dialogs.editSpotifyCredential.user) {
           patch.user = state.dialogs.editSpotifyCredential.user;
         }
@@ -124,19 +179,57 @@ export default {
           patch
         );
       } else {
+        if (
+          !state.dialogs.editSpotifyCredential.user ||
+          !state.dialogs.editSpotifyCredential.password
+        ) {
+          console.error("undefined user or password");
+          return;
+        }
         requestPromise = api.createSpotifyCredential({
           user: state.dialogs.editSpotifyCredential.user,
           password: state.dialogs.editSpotifyCredential.password,
         });
       }
-      
+
+      requestPromise
+        .then((res) => {
+          if (state.dialogs.editSpotifyCredential.id) {
+            state.spotifyCredentials.splice(state.spotifyCredentials.findIndex(c=> c.id == state.dialogs.editSpotifyCredential.id), 1, res.data)
+          } else {
+            state.spotifyCredentials.push(res.data);
+          }
+          closeEditSpotifyCredentialDialog();
+        })
+        .finally(() => {
+          state.dialogs.editSpotifyCredential.saving = false;
+        });
+    }
+
+    function useCredential(id: string) {
+      state.authenticating_credential_id = id;
+      api
+        .useSpotifyCredential(id)
+        .catch((err) => {
+          console.error(err);
+          eventbus.notifyError(
+            "Impossible de s'authentifier à Spotify. Veuillez vérifier votre identifiant et mot de passe"
+          );
+        })
+        .finally(() => {
+          state.authenticating_credential_id = null;
+        });
     }
 
     return {
+      playerStore,
       ...toRefs(state),
       newCredential,
       editCredential,
       editSpotifyCredentialForm,
+      saveEditSpotifyCredentialDialog,
+      closeEditSpotifyCredentialDialog,
+      useCredential,
     };
   },
 };
