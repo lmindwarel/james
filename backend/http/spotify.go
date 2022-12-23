@@ -211,7 +211,7 @@ func (a *API) ControlSpotifyPlayer(c *gin.Context) {
 		}
 	}
 
-	c.JSON(http.StatusOK, spotifySession.GetPlayer().GetStatus())
+	c.JSON(http.StatusOK, spotifySession.GetPlayer().PlayerStatus)
 }
 
 func (a *API) AddToPlayerQueue(c *gin.Context) {

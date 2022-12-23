@@ -7,6 +7,7 @@ import (
 func (a *API) setupRoutes(e *gin.Engine) {
 	// public router
 	e.GET("/ws", a.wshandler)
+	// e.GET("/james-status", a.GetJamesStatus)
 	e.GET("/accounts", a.GetAccounts)
 	e.POST("/accounts", a.PostAccount)
 

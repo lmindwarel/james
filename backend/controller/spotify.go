@@ -74,6 +74,13 @@ func (ctrl *Controller) AuthenticateSpotify(credentials models.SpotifyCredential
 		return errors.Wrap(err, "failed to authenticate to spotify")
 	}
 
+	err = ctrl.updateJamesStatus(models.JamesStatusPatch{
+		AuthenticatedSpotifyCredentialID: &credentials.ID,
+	})
+	if err != nil {
+		return errors.Wrap(err, "failed to update james state")
+	}
+
 	return
 }
 

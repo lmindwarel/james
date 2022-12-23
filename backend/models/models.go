@@ -38,3 +38,11 @@ func EmptyUUID(id UUID) bool {
 func NewUUID() UUID {
 	return UUID(uuid.NewV4().String())
 }
+
+type JamesStatus struct {
+	AuthenticatedSpotifyCredentialID UUID `json:"authenticated_spotify_credential_id,omitempty"` // empty if not authenticated
+}
+
+type JamesStatusPatch struct {
+	AuthenticatedSpotifyCredentialID *UUID `json:"authenticated_spotify_credential_id,omitempty"`
+}

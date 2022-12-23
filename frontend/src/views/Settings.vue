@@ -39,7 +39,7 @@ import { reactive } from 'vue';
                       v-if="authenticating_credential_id == credential.id"
                       indeterminate
                     />
-                    <v-icon v-else-if="playerStore.current_credentials_id == credential.id">
+                    <v-icon v-else-if="playerStore.authenticated_crendential_id == credential.id">
                       mdi-circle
                     </v-icon>
                     <v-btn

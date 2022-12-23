@@ -8,11 +8,10 @@ export const usePlayerStore = defineStore('player', {
     state: PlayerStates.Stopped as PlayerStates,
     track_position: 0 as number,
     current_track: null as SpotifyTrack | null,
-    current_credentials_id: null as string | null
+    authenticated_crendential_id: null as string | null
   }),
 
-  getters: {
-  },
+  getters: {},
 
   actions: {
     updateFromPlayerStatus(status: PlayerStatus) {
@@ -26,7 +25,6 @@ export const usePlayerStore = defineStore('player', {
 
       this.state = status.state
       this.track_position = status.track_position
-      this.current_credentials_id = status.current_credentials_id
     }
   }
 })

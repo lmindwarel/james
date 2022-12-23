@@ -6,6 +6,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/websocket"
+	"github.com/lmindwarel/james/backend/controller"
 	"github.com/lmindwarel/james/backend/spotify"
 )
 
@@ -35,6 +36,24 @@ func (a *API) wshandler(c *gin.Context) {
 	}
 
 	a.websocketConnection = conn
+
+	subscribedEvents := []string{
+		controller.EventJamesStatusChange,
+	}
+
+	for _, e := range subscribedEvents {
+		a.ctrl.AddEventListener(e, func(data interface{}) {
+			err = conn.WriteJSON(OutWebsocketMessage{
+				Topic: e,
+				Data:  data,
+			})
+			if err != nil {
+				log.Errorf("Failed to write websocket event: %s", err)
+			}
+		})
+	}
+
+	// spotify events
 	spotifySession, notFatalErr := a.ctrl.GetSpotifySession()
 	if notFatalErr == nil {
 		spotifySession.ListenOnPlayerStatusChange(func(s spotify.PlayerStatus) {

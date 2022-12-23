@@ -1,9 +1,9 @@
 import { usePlayerStore } from "@/plugins/store/player";
-import { PlayerStatus, QueuedTrack, SpotifyTrack, WebsocketMessage } from "@/types";
+import { PlayerStatus, QueuedTrack, JamesStatusPatch, WebsocketMessage } from "@/types";
+import eventbus from '@/services/eventbus'
 
 // @ts-ignore
 const address = `${import.meta.env.VITE_JAMES_API_ADDRESS.replace('http', 'ws')}/ws`
-console.log(address)
 const websocket = new WebSocket(address)
 
 websocket.onmessage = function (event) {
@@ -21,7 +21,15 @@ websocket.onerror = function (err) {
 
 function handleMessage(message: WebsocketMessage) {
     const playerStore = usePlayerStore()
+    console.log("received message", message)
     switch (message.topic) {
+        case "change:james-status":
+            const patch = message.data as JamesStatusPatch
+            if (patch.authenticated_spotify_credential_id){
+                playerStore.authenticated_crendential_id = patch.authenticated_spotify_credential_id
+            }
+             
+            break
         case "player-status":
             playerStore.updateFromPlayerStatus(message.data as PlayerStatus)
             break
@@ -33,4 +41,6 @@ function handleMessage(message: WebsocketMessage) {
         default:
             console.warn("Unknown message topic: " + message.topic)
     }
+
+    eventbus.emit(`ws-${message.topic}`, message.data)
 }

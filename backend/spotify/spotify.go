@@ -71,7 +71,3 @@ func (s *Session) GetPlayer() *Player {
 func (p *Player) GetQueue() []QueuedTrack {
 	return p.queue
 }
-
-func (p *Player) GetStatus() PlayerStatus {
-	return p.PlayerStatus
-}

@@ -4,6 +4,15 @@ export interface BaseModel{
     date_updated: string
 }
 
+export interface JamesStatusPatch {
+    authenticated_spotify_credential_id?: string | null,
+}
+
+export interface Status {
+    james_status: JamesStatusPatch
+    player_status: PlayerStatus
+}
+
 export interface Account {
     id: string,
     name: string,
@@ -86,7 +95,7 @@ export interface PlayerStatus {
     current_track_id: string
 	track_duration: number
 	track_position: number
-    current_credentials_id: string | null
+    authenticated_user: string | null
 }
 
 export interface SpotifyPlayerControl {

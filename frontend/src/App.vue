@@ -110,22 +110,24 @@
 
 <script lang="ts">
 import moment from "moment";
-import { computed, onMounted, reactive, ref, toRefs } from "vue";
+import { computed, onMounted, watch, reactive, ref, toRefs } from "vue";
 
 import { useRouter } from "vue-router";
 import { useAuthStore } from "@/plugins/store/auth";
 
-import Player from '@/components/Player.vue'
+import Player from "@/components/Player.vue";
 
 import eventbus from "@/services/eventbus";
 import api from "@/services/api";
 
 import { SpotifyPlaylist } from "@/types";
+import { usePlayerStore } from "./plugins/store/player";
 
 export default {
-  components: {Player},
+  components: { Player },
   setup() {
     const authStore = useAuthStore();
+    const playerStore = usePlayerStore();
     const router = useRouter();
 
     const search = ref("");
@@ -174,6 +176,11 @@ export default {
         "J'ai piscine ont piscine. Réessayez dans un instant."
       );
     });
+
+    watch(
+      () => playerStore.authenticated_crendential_id,
+      fetchSpotifyPlaylists
+    );
 
     const currentYear = computed(() => moment().year());
 
