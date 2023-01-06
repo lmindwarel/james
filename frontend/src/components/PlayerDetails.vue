@@ -1,5 +1,5 @@
 <template>
-  <v-main>
+  <div>
     <v-alert
       v-if="!tracks.length"
       border="top"
@@ -57,7 +57,7 @@
         </tr>
       </tbody>
     </v-table>
-  </v-main>
+  </div>
 </template>
 
 <script lang="ts">

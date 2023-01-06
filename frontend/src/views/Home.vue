@@ -11,21 +11,30 @@
         </h1>
         <v-row class="my-2">
           <v-col
-            v-for="playlist in playlists"
+            v-for="playlist in spotifyPlaylists"
             :key="playlist.id"
             cols="2"
           >
-            <v-card class="d-flex">
+            <v-card
+              class="d-flex"
+              :to="`/playlist/${playlist.id}`"
+            >
               <v-img
+                v-if="playlist?.images.length"
                 width="100"
                 height="100"
                 cover
                 aspect-ratio="1"
-                :src="playlist.image"
+                :src="playlist?.images[0].url"
               />
+              <v-icon
+                v-else
+                size="100"
+              >
+                mdi-music
+              </v-icon>
               <div>
-                <v-card-title>{{ playlist.title }}</v-card-title>
-                <v-card-subtitle>{{ playlist.subtitle }}</v-card-subtitle>
+                <v-card-title>{{ playlist.name }}</v-card-title>
               </div>
             </v-card>
           </v-col>
@@ -36,49 +45,42 @@
 </template>
 
 <script lang="ts">
-import { reactive, toRefs } from "vue";
+import { onMounted, reactive, toRefs, watch } from "vue";
 import { useAuthStore } from "@/plugins/store/auth";
 import { useRouter } from "vue-router";
+import { SpotifyPlaylist } from '@/types';
+import api from '@/services/api';
+import { useCommonStore } from '@/plugins/store/common';
 
 export default {
   setup() {
     const authStore = useAuthStore();
     const router = useRouter();
+    const commonStore = useCommonStore()
 
     const state = reactive({
-      playlists: [
-        {
-          id: 1,
-          image: "https://picsum.photos/200?random=1",
-          title: "Rock",
-          subtitle: "56 titres"
-        },
-         {
-          id: 2,
-          image: "https://picsum.photos/200?random=2",
-          title: "Pop",
-          subtitle: "25 titres"
-        },
-         {
-          id: 3,
-          image: "https://picsum.photos/200?random=3",
-          title: "Electro",
-          subtitle: "10 titres"
-        },
-         {
-          id: 5,
-          image: "https://picsum.photos/200?random=4",
-          title: "Swing",
-          subtitle: "68 titres"
-        },
-         {
-          id: 5,
-          image: "https://picsum.photos/200?random=5",
-          title: "Jazz",
-          subtitle: "2 titres"
-        }
-      ]
+      loadingPlaylists: false,
+      spotifyPlaylists: [] as SpotifyPlaylist[],
     });
+
+    function fetchSpotifyPlaylists() {
+      state.loadingPlaylists = true;
+      api
+        .getSpotifyPlaylists()
+        .then(({ data }) => {
+          state.spotifyPlaylists = data ? data.items : [];
+        })
+        .finally(() => {
+          state.loadingPlaylists = false;
+        });
+    }
+
+    onMounted(fetchSpotifyPlaylists)
+
+    watch(
+      () => commonStore.parameters?.current_spotify_credential,
+      fetchSpotifyPlaylists
+    );
 
     return {
       ...toRefs(state),

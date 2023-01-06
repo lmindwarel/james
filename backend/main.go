@@ -2,7 +2,6 @@ package main
 
 import (
 	"encoding/json"
-	"fmt"
 	"os"
 
 	"github.com/lmindwarel/james/backend/controller"
@@ -12,6 +11,8 @@ import (
 	"github.com/lmindwarel/james/backend/utils"
 	"github.com/xlab/portaudio-go/portaudio"
 )
+
+var log = utils.GetLogger("james")
 
 // Config is the core configuration
 type Config struct {
@@ -36,7 +37,7 @@ func main() {
 		panic("please provide config.json or give the path in arg")
 	}
 
-	fmt.Printf("Reading config file...")
+	log.Noticef("Loading config file...")
 	configFile, err := os.Open(configFileName)
 	if err != nil {
 		panic(err)
@@ -47,42 +48,40 @@ func main() {
 	if err = parser.Decode(&config); err != nil {
 		panic(err)
 	}
-	fmt.Printf("ok\n")
 
 	configJSON, _ := json.MarshalIndent(config, "    ", "    ")
+	log.Debugf("Loaded config: %s", configJSON)
 
-	fmt.Printf("config file: %s", configJSON)
-
-	fmt.Printf("Initialize logger...")
+	log.Noticef("Initialize logger...")
 	utils.InitLogger(config.LogPath)
-	fmt.Printf("ok\n")
+	log.Noticef("Logger initialized to %s", config.LogPath)
 
-	fmt.Printf("Initialize datastore...")
+	log.Noticef("Initialize datastore...")
 	ds, err := datastore.New(config.Datastore)
 	if err != nil {
 		panic(err)
 	}
-	fmt.Printf("ok\n")
+	log.Noticef("Datastore initialized successfully")
 
-	fmt.Printf("Initialize controller...")
+	log.Noticef("Initialize controller...")
 	ctrl := controller.New(ds, config.Config)
-	fmt.Printf("ok\n")
+	log.Noticef("Contorller initialized")
 
-	// fmt.Printf("Connecting spotify account...")
+	// log.Noticef("Connecting spotify account...")
 	// err = ctrl.ConnectSpotifyAccount("4153cca5cb4544ad8973eb94a7de36e1", os.Getenv("SPOTIFY_SECRET"))
 	// if err != nil {
 	// 	panic(err)
 	// }
-	// fmt.Printf("ok\n")
+	// log.Noticef("ok\n")
 
-	// fmt.Printf("Get liked titles...")
+	// log.Noticef("Get liked titles...")
 	// err = ctrl.GetLikedTitles()
 	// if err != nil {
 	// 	panic(err)
 	// }
-	// fmt.Printf("ok\n")
+	// log.Noticef("ok\n")
 
-	fmt.Printf("Initialize api...")
+	log.Noticef("Initialize api...")
 	a := http.New(config.API, ctrl, ds)
 	go func() {
 		err = a.StartServer()
@@ -90,11 +89,20 @@ func main() {
 			panic(err)
 		}
 	}()
-	fmt.Printf("ok\n")
+	log.Noticef("API initialized")
 
+	log.Noticef("Initialize port audio...")
 	if err := portaudio.Initialize(); spotify.PAError(err) {
 		panic("PortAudio init error: " + spotify.PAErrorText(err))
 	}
+	log.Noticef("Port audio initialized")
+
+	notFatalErr := ctrl.AuthenticateCurrentSpotifyCredential()
+	if notFatalErr != nil {
+		log.Warningf("Failed to authenticate with current spotify credential: %s", notFatalErr)
+	}
+
+	log.Noticef("Every services initialized, at your service.")
 
 	utils.Standby()
 }

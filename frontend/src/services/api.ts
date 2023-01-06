@@ -1,6 +1,6 @@
 import axios from 'axios'
 import { useAuthStore } from '@/plugins/store/auth'
-import { Account, AccountPatch, CredentialPatch, PlayerStatus, QueuedTrack, SpotifyCredential, SpotifyPlayerControl, SpotifyPlaylist, SpotifyPlaylistsResult, SpotifyPlaylistTracksResult, SpotifyTrack } from '@/types'
+import { Account, AccountPatch, BasicsData, CredentialPatch, Parameter, PlayerStatus, QueuedTrack, SpotifyCredential, SpotifyPlayerControl, SpotifyPlaylist, SpotifyPlaylistsResult, SpotifyPlaylistTracksResult, SpotifyTrack } from '@/types'
 
 const apiClient = axios.create({
   // @ts-ignore
@@ -34,12 +34,13 @@ apiClient.interceptors.response.use((res) => res, (res) => {
 
 
 export default {
+  getParameters: () => apiClient.get<Parameter[]>('/parameters'),
+  patchParameter: (parameter: Parameter) => apiClient.patch<Parameter>(`/parameters/${parameter.id}`, parameter),
   getAccounts: () => apiClient.get<Account[]>('/accounts'),
   postAccount: (account: AccountPatch) => apiClient.post<Account>('/accounts', account),
   getSpotifyCredentials: () => apiClient.get<SpotifyCredential[]>('/spotify/credentials'),
   createSpotifyCredential: (credential: CredentialPatch) => apiClient.post<SpotifyCredential>('/spotify/credentials', credential),
   patchSpotifyCredential: (id: string, credential: CredentialPatch) => apiClient.patch<SpotifyCredential>(`/spotify/credentials/${id}`, credential),
-  useSpotifyCredential: (id: string) => apiClient.put(`/spotify/credentials/${id}/use`),
   getSpotifyPlaylists: () => apiClient.get<SpotifyPlaylistsResult>('/spotify/playlists'),
   getSpotifyPlaylist:(id: string)=> apiClient.get<SpotifyPlaylist>(`/spotify/playlists/${id}`),
   getSpotifyPlaylistTracks: (playlistID: string) => apiClient.get<SpotifyPlaylistTracksResult>(`/spotify/playlists/${playlistID}/tracks`),

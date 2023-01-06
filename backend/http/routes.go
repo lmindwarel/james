@@ -14,11 +14,14 @@ func (a *API) setupRoutes(e *gin.Engine) {
 	// authenticated only
 	// Authorization group
 	authenticated := e.Group("/")
+
+	authenticated.GET("/parameters", a.GetParameters)
+	authenticated.PATCH("/parameters/:id", a.PatchParameter)
+
 	spotify := authenticated.Group("/spotify")
 	spotify.GET("/credentials", a.GetSpotifyCredentials)
 	spotify.POST("/credentials", a.CreateSpotifyCredential)
 	spotify.PATCH("/credentials/:id", a.PatchSpotifyCredential)
-	spotify.PUT("/credentials/:id/use", a.AuthenticateSpotifyCredential)
 	spotify.GET("/playlists", a.GetSpotifyPlaylists)
 	spotify.GET("/playlists/:id", a.GetSpotifyPlaylist)
 	spotify.GET("/playlists/:id/tracks", a.GetSpotifyPlaylistTracks)

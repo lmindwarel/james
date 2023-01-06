@@ -7,11 +7,11 @@
       <v-row align="center">
         <v-col cols="3">
           <v-img
-            v-if="playerStore.currentTrack"
+            v-if="playerStore.current_track"
             :aspect-ratio="1"
             width="100"
             cover
-            :src="playerStore.currentTrack.album.images[0].url"
+            :src="playerStore.current_track.album.images[0].url"
           />
           <v-icon
             v-else
@@ -21,7 +21,7 @@
           </v-icon>
         </v-col>
         <v-col>
-          <span v-if="playerStore.currentTrack">{{ playerStore.currentTrack.name }}</span>
+          <span v-if="playerStore.current_track">{{ playerStore.current_track.name }}</span>
         </v-col>
       </v-row>
     </v-col>
@@ -59,8 +59,8 @@
       <div class="d-flex align-center">
         <v-btn
           variant="flat"
-          to="/queue"
           icon="mdi-menu"
+          @click="$emit('open-details')"
         />
         <v-slider
           density="compact"
@@ -73,14 +73,12 @@
 </template>
 
 <script lang="ts">
-import { computed, ref } from "vue";
+import { computed, reactive, toRefs, } from "vue";
 import { usePlayerStore } from "@/plugins/store/player";
 import { millisToMinutesAndSeconds } from "@/utils";
 import { PlayerStates, SpotifyPlayerControl } from "@/types";
 import api from "@/services/api";
 import _ from "lodash";
-
-const queueRoute = `${location.origin}/queue`
 
 export default {
   setup() {
@@ -94,15 +92,15 @@ export default {
 
     const progression = computed({
       get() {
-        return playerStore.currentTrack
-          ? (playerStore.track_position / playerStore.currentTrack?.duration_ms) * 100
+        return !!playerStore.current_track
+          ? (playerStore.track_position / playerStore.current_track?.duration_ms) * 100
           : 0;
       },
       set(newValue: number) {
-        if (playerStore.currentTrack) {
+        if (playerStore.current_track) {
           controlDebouced({
             track_position_ms: Math.floor(
-              playerStore.currentTrack?.duration_ms * (newValue / 100)
+              playerStore.current_track?.duration_ms * (newValue / 100)
             ),
           });
         }
@@ -113,13 +111,13 @@ export default {
       millisToMinutesAndSeconds(playerStore.track_position)
     );
     const trackDurationText = computed(() =>
-      playerStore.currentTrack
-        ? millisToMinutesAndSeconds(playerStore.currentTrack.duration_ms)
+      playerStore.current_track
+        ? millisToMinutesAndSeconds(playerStore.current_track.duration_ms)
         : "0:00"
     );
 
     function togglePlayerState() {
-      if (playerStore.currentTrack) {
+      if (playerStore.current_track) {
         controlDebouced({
           pause: playerStore.state == PlayerStates.Playing,
         });
@@ -133,7 +131,6 @@ export default {
       togglePlayerState,
       progressionText,
       trackDurationText,
-      queueRoute
     };
   },
 };

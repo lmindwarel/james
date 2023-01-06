@@ -23,13 +23,6 @@ function handleMessage(message: WebsocketMessage) {
     const playerStore = usePlayerStore()
     console.log("received message", message)
     switch (message.topic) {
-        case "change:james-status":
-            const patch = message.data as JamesStatusPatch
-            if (patch.authenticated_spotify_credential_id){
-                playerStore.authenticated_crendential_id = patch.authenticated_spotify_credential_id
-            }
-             
-            break
         case "player-status":
             playerStore.updateFromPlayerStatus(message.data as PlayerStatus)
             break

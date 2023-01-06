@@ -1,7 +1,6 @@
 package spotify
 
 import (
-	"fmt"
 	"time"
 
 	"github.com/faiface/beep"
@@ -99,7 +98,11 @@ const (
 
 func (s *Session) PlayTrack(id ID) error {
 	s.player.QueueTrackAtIndex(s.player.CurrentQueueIndex+1, QueuedTrack{TrackID: id, ManuallyAdded: true})
-	s.listeners.OnQueueChange(s.player.queue)
+
+	if s.listeners.OnQueueChange != nil {
+		s.listeners.OnQueueChange(s.player.queue)
+	}
+
 	return s.PlayNextQueuedTrack()
 }
 
@@ -142,13 +145,13 @@ func (s *Session) PlayNextQueuedTrack() error {
 	// We have the track audio, let's play it! Initialize the OGG decoder, and start a PortAudio stream.
 	// Note that we skip the first 167 bytes as it is a Spotify-specific header. You can decode it by
 	// using this: https://sourceforge.net/p/despotify/code/HEAD/tree/java/trunk/src/main/java/se/despotify/client/player/SpotifyOggHeader.java
-	fmt.Println("Setting up OGG decoder...")
+	log.Debug("Setting up OGG decoder...")
 	// dec, err := decoder.New(audioFile, samplesPerChannel)
 	// if err != nil {
 	// 	return errors.Wrap(err, "failed to load decoder")
 	// }
 
-	fmt.Println("Decoding stream...")
+	log.Debug("Decoding stream...")
 	// fmt.Printf("PortAudio channels: %d / SampleRate: %f\n", info.Channels, info.SampleRate)
 
 	streamer, format, err := vorbis.Decode(audioFile)
@@ -156,8 +159,7 @@ func (s *Session) PlayNextQueuedTrack() error {
 		return errors.Wrap(err, "failed to decode audio file")
 	}
 
-	speaker.Lock()
-	fmt.Println("Setting up  stream...")
+	log.Debug("Setting up  stream...")
 	s.player.streamer = streamer
 	s.player.ctrl = &beep.Ctrl{Streamer: beep.Loop(1, streamer)}
 	s.player.resampler = beep.ResampleRatio(4, 1, s.player.ctrl)
@@ -173,7 +175,7 @@ func (s *Session) PlayNextQueuedTrack() error {
 		return errors.Wrap(err, "failed to initialize speaker")
 	}
 
-	log.Debug("ok")
+	log.Debug("Playing track")
 
 	speaker.Play(beep.Seq(s.player.volume, beep.Callback(func() {
 		if len(s.player.queue) > s.player.CurrentQueueIndex {
@@ -187,9 +189,10 @@ func (s *Session) PlayNextQueuedTrack() error {
 
 	s.player.TrackDuration = models.DurationMs(time.Duration(*track.Duration) * time.Millisecond)
 	s.player.State = PlayerState(PlayerStatePlaying)
-	s.listeners.OnPlayerStatusChange(s.player.PlayerStatus)
+	if s.listeners.OnPlayerStatusChange != nil {
+		s.listeners.OnPlayerStatusChange(s.player.PlayerStatus)
+	}
 	s.StartPlayerListener()
-	speaker.Unlock()
 
 	log.Debug("Done!")
 
@@ -201,7 +204,9 @@ func (s *Session) Pause() {
 	defer speaker.Unlock()
 	s.player.ctrl.Paused = true
 	s.player.State = PlayerState(PlayerStatePaused)
-	s.listeners.OnPlayerStatusChange(s.player.PlayerStatus)
+	if s.listeners.OnPlayerStatusChange != nil {
+		s.listeners.OnPlayerStatusChange(s.player.PlayerStatus)
+	}
 }
 
 func (s *Session) Resume() {
@@ -222,7 +227,9 @@ func (s *Session) StartPlayerListener() {
 			case <-ticker.C:
 				speaker.Lock()
 				s.player.TrackPosition = models.DurationMs(s.player.sampleRate.D(s.player.streamer.Position()))
-				s.listeners.OnPlayerStatusChange(s.player.PlayerStatus)
+				if s.listeners.OnPlayerStatusChange != nil {
+					s.listeners.OnPlayerStatusChange(s.player.PlayerStatus)
+				}
 				log.Debugf("track position: %dms, duration: %dms", time.Duration(s.player.TrackPosition).Milliseconds(), time.Duration(s.player.TrackDuration).Milliseconds())
 				speaker.Unlock()
 

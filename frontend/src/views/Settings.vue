@@ -39,7 +39,7 @@ import { reactive } from 'vue';
                       v-if="authenticating_credential_id == credential.id"
                       indeterminate
                     />
-                    <v-icon v-else-if="playerStore.authenticated_crendential_id == credential.id">
+                    <v-icon v-else-if="commonStore.parameters.current_spotify_credential == credential.id">
                       mdi-circle
                     </v-icon>
                     <v-btn
@@ -107,14 +107,16 @@ import { reactive } from 'vue';
 
 <script lang="ts">
 import { onMounted, reactive, ref, toRefs } from "vue";
-import { CredentialPatch, SpotifyCredential } from "@/types";
+import { CredentialPatch, PARAMETERS_IDS, SpotifyCredential } from "@/types";
 import { VForm } from "vuetify/components";
 import api from "../services/api";
 import { usePlayerStore } from "@/plugins/store/player";
 import eventbus from "@/services/eventbus";
+import { useCommonStore } from '@/plugins/store/common';
 
 export default {
   setup() {
+    const commonStore = useCommonStore()
     const playerStore = usePlayerStore();
 
     const state = reactive({
@@ -207,10 +209,9 @@ export default {
     }
 
     function useCredential(id: string) {
+      commonStore.parameters.current_spotify_credential = id
       state.authenticating_credential_id = id;
-      api
-        .useSpotifyCredential(id)
-        .catch((err) => {
+       commonStore.saveParameter(PARAMETERS_IDS.CURRENT_SPOTIFY_CREDENTIAL).catch((err) => {
           console.error(err);
           eventbus.notifyError(
             "Impossible de s'authentifier à Spotify. Veuillez vérifier votre identifiant et mot de passe"
@@ -223,6 +224,7 @@ export default {
 
     return {
       playerStore,
+      commonStore,
       ...toRefs(state),
       newCredential,
       editCredential,

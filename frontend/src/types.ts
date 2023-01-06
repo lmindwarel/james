@@ -4,12 +4,20 @@ export interface BaseModel{
     date_updated: string
 }
 
-export interface JamesStatusPatch {
-    authenticated_spotify_credential_id?: string | null,
+export interface Parameters {
+    current_spotify_credential: string | null
+}
+
+export interface Parameter {
+    id: PARAMETERS_IDS,
+    value: any
+}
+
+export enum PARAMETERS_IDS {
+    CURRENT_SPOTIFY_CREDENTIAL = 'current_spotify_credential',
 }
 
 export interface Status {
-    james_status: JamesStatusPatch
     player_status: PlayerStatus
 }
 
@@ -92,7 +100,7 @@ export interface WebsocketMessage {
 
 export interface PlayerStatus {
 	state: PlayerStates
-    current_track_id: string
+    current_queue_index: number
 	track_duration: number
 	track_position: number
     authenticated_user: string | null
@@ -105,6 +113,6 @@ export interface SpotifyPlayerControl {
 }
 
 export interface QueuedTrack {
-    track: SpotifyTrack
+    track_id: string
     manually_added: boolean
 }

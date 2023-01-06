@@ -8,7 +8,7 @@ export const usePlayerStore = defineStore('player', {
     state: PlayerStates.Stopped as PlayerStates,
     track_position: 0 as number,
     current_track: null as SpotifyTrack | null,
-    authenticated_crendential_id: null as string | null
+    current_queue_index: null as number | null,
   }),
 
   getters: {},
@@ -16,15 +16,16 @@ export const usePlayerStore = defineStore('player', {
   actions: {
     updateFromPlayerStatus(status: PlayerStatus) {
       console.log("loading from player status")
-      if (!this.current_track || status.current_track_id != this.current_track.id) {
+      if (!this.current_track && !!this.queue[status.current_queue_index]) {
         // load the new curent track
-        api.getSpotifyTrack(status.current_track_id).then(res => {
+        api.getSpotifyTrack(this.queue[status.current_queue_index].track_id).then(res => {
           this.current_track = res.data
         })
       }
 
       this.state = status.state
       this.track_position = status.track_position
+      this.current_queue_index = status.current_queue_index
     }
   }
 })

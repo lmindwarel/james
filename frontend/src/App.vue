@@ -81,7 +81,22 @@
       </v-list>
     </v-navigation-drawer>
 
-    <router-view />
+    <div>
+      <router-view />
+
+      <v-dialog
+        v-model="dialogs.playerDetails"
+        fullscreen
+        attach
+        absolute
+        :scrim="false"
+        transition="dialog-bottom-transition"
+      >
+        <v-card>
+          <player-details />
+        </v-card>
+      </v-dialog>
+    </div>
 
     <v-snackbar
       v-model="snackbar.visible"
@@ -103,7 +118,7 @@
       elevation="2"
       class="ml-0"
     >
-      <player />
+      <player @open-details="dialogs.playerDetails = true" />
     </v-footer>
   </v-app>
 </template>
@@ -116,18 +131,20 @@ import { useRouter } from "vue-router";
 import { useAuthStore } from "@/plugins/store/auth";
 
 import Player from "@/components/Player.vue";
+import PlayerDetails from '@/components/PlayerDetails.vue'
 
 import eventbus from "@/services/eventbus";
 import api from "@/services/api";
 
 import { SpotifyPlaylist } from "@/types";
-import { usePlayerStore } from "./plugins/store/player";
+import { useCommonStore } from './plugins/store/common';
 
 export default {
-  components: { Player },
+  components: { Player, PlayerDetails },
   setup() {
     const authStore = useAuthStore();
-    const playerStore = usePlayerStore();
+    const commonStore = useCommonStore();
+
     const router = useRouter();
 
     const search = ref("");
@@ -138,9 +155,20 @@ export default {
         color: "",
         message: "",
       },
+      dialogs:{
+        playerDetails: false,
+      },
       loadingPlaylists: false,
       spotifyPlaylists: [] as SpotifyPlaylist[],
     });
+
+    onMounted(()=>{
+      api
+        .getParameters()
+        .then(({ data }) => {
+          commonStore.loadParameters(data)
+        })
+    })
 
     function fetchSpotifyPlaylists() {
       state.loadingPlaylists = true;
@@ -178,7 +206,7 @@ export default {
     });
 
     watch(
-      () => playerStore.authenticated_crendential_id,
+      () => commonStore.parameters?.current_spotify_credential,
       fetchSpotifyPlaylists
     );
 

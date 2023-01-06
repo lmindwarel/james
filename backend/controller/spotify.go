@@ -60,22 +60,22 @@ func (ctrl *Controller) PatchSpotifyCredential(credential models.SpotifyCredenti
 	return credential, err
 }
 
-func (ctrl *Controller) AuthenticateSpotify(credentials models.SpotifyCredential) (err error) {
+func (ctrl *Controller) AuthenticateSpotify(credential models.SpotifyCredential) (err error) {
 	// decrypt password
-	password, err := utils.Decrypt(models.SpotifyPasswordHashKey, credentials.HashedPassword)
+	password, err := utils.Decrypt(models.SpotifyPasswordHashKey, credential.HashedPassword)
 	if err != nil {
 		return errors.Wrap(err, "failed to decrypt password")
 	}
 
-	log.Infof("authenticating user %s to Spotify with password %s", credentials.User, password)
+	log.Infof("authenticating user %s to Spotify with password %s", credential.User, password)
 
-	ctrl.spotifySession, err = spotify.Authenticate(ctrl.config.SpotifyClientID, ctrl.config.SpotifyClientSecret, credentials.User, password)
+	ctrl.spotifySession, err = spotify.Authenticate(ctrl.config.SpotifyClientID, ctrl.config.SpotifyClientSecret, credential.User, password)
 	if err != nil {
 		return errors.Wrap(err, "failed to authenticate to spotify")
 	}
 
 	err = ctrl.updateJamesStatus(models.JamesStatusPatch{
-		AuthenticatedSpotifyCredentialID: &credentials.ID,
+		AuthenticatedSpotifyCredentialID: &credential.ID,
 	})
 	if err != nil {
 		return errors.Wrap(err, "failed to update james state")
@@ -84,21 +84,40 @@ func (ctrl *Controller) AuthenticateSpotify(credentials models.SpotifyCredential
 	return
 }
 
-func (ctrl *Controller) ConnectSelectedSpotifyCredentials() error {
-	usedSpotifyCredentialsID, err := ctrl.ds.GetUUIDParameter(models.ParamSpotifyCredentials)
-	if err != nil {
-		return errors.Wrap(err, "failed to get used spotify credentials parameter")
+func (ctrl *Controller) GetCurrentSpotifyCredential() (credential *models.SpotifyCredential, err error) {
+	selectedCredentialID, notFatalErr := ctrl.ds.GetUUIDParameter(models.ParamCurrentSpotifyCredential)
+	if notFatalErr != nil {
+		if !ctrl.ds.IsNotFoundError(notFatalErr) {
+			return credential, errors.Wrap(err, "failed to get selected spotify credential parameter")
+		}
+
+		return nil, nil // no credentials selected
 	}
 
-	credentials, err := ctrl.ds.GetSpotifyCredential(usedSpotifyCredentialsID)
+	credentialTmp, err := ctrl.ds.GetSpotifyCredential(selectedCredentialID)
 	if err != nil {
-		return errors.Wrapf(err, "failed to get spotify credentials %s", usedSpotifyCredentialsID)
+		return credential, errors.Wrapf(err, "failed to get selected spotify credential %s", selectedCredentialID)
 	}
 
-	err = ctrl.AuthenticateSpotify(credentials)
+	credential = &credentialTmp
+
+	return
+}
+
+func (ctrl *Controller) AuthenticateCurrentSpotifyCredential() (err error) {
+	currentCredential, err := ctrl.GetCurrentSpotifyCredential()
 	if err != nil {
-		return errors.Wrapf(err, "failed to authenticate to spotify")
+		return errors.Wrap(err, "failed to get current spotify credential")
 	}
 
-	return nil
+	if currentCredential == nil {
+		return
+	}
+
+	err = ctrl.AuthenticateSpotify(*currentCredential)
+	if err != nil {
+		return errors.Wrap(err, "failed to authenticate to spotify")
+	}
+
+	return
 }

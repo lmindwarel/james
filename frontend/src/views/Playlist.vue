@@ -5,7 +5,16 @@
       align="center"
     >
       <v-col cols="2">
-        <v-img :src="playlist?.images[0].url" />
+        <v-img
+          v-if="playlist?.images.length"
+          :src="playlist?.images[0].url"
+        />
+        <v-icon
+          v-else
+          size="100"
+        >
+          mdi-music
+        </v-icon>
       </v-col>
       <v-col>
         <h1 class="text-h1">

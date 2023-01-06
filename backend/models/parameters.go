@@ -1,10 +1,14 @@
 package models
 
 const (
-	ParamSpotifyCredentials = UUID("spotify-credentials")
+	ParamCurrentSpotifyCredential = UUID("current_spotify_credential")
 )
 
 type Parameter struct {
 	BaseModel `bson:",inline"`
-	Value     interface{} `bson:"value"`
+	Value     interface{} `json:"value" bson:"value"`
+}
+
+type ParameterPatch struct {
+	Value interface{} `json:"value"`
 }
