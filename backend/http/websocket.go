@@ -8,6 +8,7 @@ import (
 	"github.com/gorilla/websocket"
 	"github.com/lmindwarel/james/backend/controller"
 	"github.com/lmindwarel/james/backend/spotify"
+	"github.com/pkg/errors"
 )
 
 type InWebsocketMessage struct {
@@ -57,18 +58,24 @@ func (a *API) wshandler(c *gin.Context) {
 	spotifySession, notFatalErr := a.ctrl.GetSpotifySession()
 	if notFatalErr == nil {
 		spotifySession.ListenOnPlayerStatusChange(func(s spotify.PlayerStatus) {
-			conn.WriteJSON(OutWebsocketMessage{
+			err := a.SendWebsocketMessage(OutWebsocketMessage{
 				Topic: "player-status",
 				Data:  s,
 			})
+			if err != nil {
+				log.Errorf("Failed to send websocket message: %s", err)
+			}
 		})
 
 		spotifySession.ListenOnPlayerQueueChange(func(q []spotify.QueuedTrack) {
 			// TODO only send from -10 in queue position
-			conn.WriteJSON(OutWebsocketMessage{
+			err := a.SendWebsocketMessage(OutWebsocketMessage{
 				Topic: "player-queue",
 				Data:  q,
 			})
+			if err != nil {
+				log.Errorf("Failed to send websocket message: %s", err)
+			}
 		})
 	}
 
@@ -86,6 +93,19 @@ func (a *API) wshandler(c *gin.Context) {
 			a.HandleWebsocketMessage(message)
 		}
 	}
+}
+
+func (a *API) SendWebsocketMessage(message OutWebsocketMessage) error {
+	if a.websocketConnection == nil {
+		return errors.New("websocket connection closed")
+	}
+
+	err := a.websocketConnection.WriteJSON(message)
+	if err != nil {
+		return errors.Wrap(err, "failed to write websocket message")
+	}
+
+	return nil
 }
 
 func (a *API) HandleWebsocketMessage(msg InWebsocketMessage) {

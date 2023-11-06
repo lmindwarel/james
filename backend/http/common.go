@@ -8,20 +8,27 @@ import (
 	"github.com/lmindwarel/james/backend/utils"
 )
 
-// func (a *API) GetStatus(c *gin.Context) {
+func (a *API) GetBasics(c *gin.Context) {
+	out := gin.H{}
+	if a.ctrl.IsSpotifyConnected() {
+		spotifySession, err := a.ctrl.GetSpotifySession()
+		if err != nil {
+			c.AbortWithError(http.StatusInternalServerError, err)
+			return
+		}
 
-// 	if a.ctrl.IsSpotifyConnected() {
-// 		spotifySession, err := a.ctrl.GetSpotifySession()
-// 		if err != nil {
-// 			c.AbortWithError(http.StatusInternalServerError, err)
-// 			return
-// 		}
+		playerQueue := spotifySession.GetPlayer().GetQueue()
+		if err != nil {
+			c.AbortWithError(http.StatusInternalServerError, err)
+			return
+		}
 
-// 		fullState.SpotifyPlayerStatus = spotifySession.GetPlayer().PlayerStatus
-// 	}
+		out["player_queue"] = playerQueue
+		out["player_status"] = spotifySession.GetPlayer().PlayerStatus
+	}
 
-// 	c.JSON(http.StatusOK, fullState)
-// }
+	c.JSON(http.StatusOK, out)
+}
 
 func (a *API) GetParameters(c *gin.Context) {
 	parameters, err := a.ds.GetParameters()

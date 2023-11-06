@@ -15,6 +15,7 @@ func (a *API) setupRoutes(e *gin.Engine) {
 	// Authorization group
 	authenticated := e.Group("/")
 
+	authenticated.GET("/basics", a.GetBasics)
 	authenticated.GET("/parameters", a.GetParameters)
 	authenticated.PATCH("/parameters/:id", a.PatchParameter)
 

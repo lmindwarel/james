@@ -1,13 +1,5 @@
 package spotify
 
-import (
-	"context"
-
-	"github.com/lmindwarel/james/backend/models"
-	"github.com/pkg/errors"
-	"github.com/zmb3/spotify/v2"
-)
-
 // AddTrackToQueue will add the track to the manual queue, moving all automatically queued tracks
 func (s *Session) AddTrackToQueue(trackID ID) {
 	insertAtIndex := -1
@@ -22,38 +14,17 @@ func (s *Session) AddTrackToQueue(trackID ID) {
 	}
 
 	s.player.QueueTrackAtIndex(insertAtIndex, QueuedTrack{TrackID: trackID, ManuallyAdded: true})
-	s.listeners.OnQueueChange(s.player.queue)
+	if s.listeners.OnQueueChange != nil {
+		s.listeners.OnQueueChange(s.player.queue)
+	}
 }
 
 func (s *Session) RemoveTrackFromQueue(trackID ID) {
 	// TODO
 }
 
-func (s *Session) GetPlayerQueue(ctx context.Context) (queuedTracks []models.SpotifyQueuedTrack, err error) {
-	var ids []spotify.ID
-	queuedTracksByID := map[spotify.ID]QueuedTrack{}
-	for _, queuedTrack := range s.player.queue {
-		ids = append(ids, spotify.ID(queuedTrack.TrackID))
-		queuedTracksByID[spotify.ID(queuedTrack.TrackID)] = queuedTrack
-	}
-
-	tracks, err := s.webapiClient.GetTracks(ctx, ids)
-	if err != nil {
-		return queuedTracks, errors.Wrap(err, "failed to get tracks")
-	}
-
-	for _, t := range tracks {
-		queuedTracks = append(queuedTracks, models.SpotifyQueuedTrack{
-			Track:         *t,
-			ManuallyAdded: queuedTracksByID[t.ID].ManuallyAdded,
-		})
-	}
-
-	return
-}
-
 func (p *Player) QueueTrackAtIndex(index int, track QueuedTrack) {
-	if len(p.queue) < index {
+	if index > len(p.queue)-1 || index < 0 {
 		p.queue = append(p.queue, track)
 		return
 	}

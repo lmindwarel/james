@@ -1,5 +1,5 @@
 <template>
-  <div class="fill-height d-flex flex-column justify-center align-center">
+  <div class="fill-height d-flex flex-column justify-space-around align-center">
     <div class="d-flex flex-column justify-center align-center mb-12">
       <v-icon
         size="300"

@@ -184,8 +184,6 @@ func (a *API) ControlSpotifyPlayer(c *gin.Context) {
 		c.AbortWithError(http.StatusNetworkAuthenticationRequired, err)
 	}
 
-	log.Debugf("control: %v", control)
-
 	if control.Pause != nil {
 		if len(spotifySession.GetPlayer().GetQueue()) == 0 {
 			c.AbortWithError(http.StatusNotAcceptable, errors.New("no current track"))
@@ -211,6 +209,15 @@ func (a *API) ControlSpotifyPlayer(c *gin.Context) {
 		}
 	}
 
+	if control.Volume != nil {
+		log.Debugf("set volume to %d", *control.Volume)
+		err = spotifySession.SetVolume(*control.Volume)
+		if err != nil {
+			c.AbortWithError(http.StatusInternalServerError, err)
+			return
+		}
+	}
+
 	c.JSON(http.StatusOK, spotifySession.GetPlayer().PlayerStatus)
 }
 
@@ -226,18 +233,18 @@ func (a *API) AddToPlayerQueue(c *gin.Context) {
 }
 
 func (a *API) GetPlayerQueue(c *gin.Context) {
-	spotifySession, err := a.ctrl.GetSpotifySession()
-	if err != nil {
-		c.AbortWithError(http.StatusNetworkAuthenticationRequired, err)
-	}
+	// spotifySession, err := a.ctrl.GetSpotifySession()
+	// if err != nil {
+	// 	c.AbortWithError(http.StatusNetworkAuthenticationRequired, err)
+	// }
 
-	queuedTracks, err := spotifySession.GetPlayerQueue(c.Request.Context())
-	if err != nil {
-		c.AbortWithError(http.StatusInternalServerError, err)
-		return
-	}
+	// // queuedTracks, err := spotifySession.GetPlayerQueue(c.Request.Context())
+	// if err != nil {
+	// 	c.AbortWithError(http.StatusInternalServerError, err)
+	// 	return
+	// }
 
-	c.JSON(http.StatusOK, queuedTracks)
+	// c.JSON(http.StatusOK, queuedTracks)
 }
 
 func (a *API) DeleteTrackFromPlayerQueue(c *gin.Context) {

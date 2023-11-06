@@ -5,8 +5,12 @@
       align="center"
     >
       <v-col cols="2">
+        <v-skeleton-loader
+          v-if="loading.playlist"
+          type="image"
+        />
         <v-img
-          v-if="playlist?.images.length"
+          v-else-if="playlist?.images.length"
           :src="playlist?.images[0].url"
         />
         <v-icon
@@ -17,13 +21,24 @@
         </v-icon>
       </v-col>
       <v-col>
-        <h1 class="text-h1">
+        <v-skeleton-loader
+          v-if="loading.playlist"
+          type="heading"
+        />
+        <h1
+          v-else
+          class="text-h1"
+        >
           {{ playlist?.name }}
         </h1>
       </v-col>
     </v-row>
 
-    <v-table>
+    <v-skeleton-loader
+      v-if="loading.tracks"
+      type="table"
+    />
+    <v-table v-else>
       <thead>
         <tr>
           <th class="text-right">
@@ -49,8 +64,18 @@
           v-for="playlistTrack of tracks"
           :key="playlistTrack.track.id"
         >
-          <td class="text-right">
+          <td class="d-flex justify-end">
+            <v-sheet
+              v-if="playerStore.current_track?.id == playlistTrack.track.id"
+              width="50px"
+            >
+              <vue-3-lottie
+                :animation-data="audioPlayingAnimation"
+              />
+            </v-sheet>
+            
             <v-btn
+              v-else
               variant="text"
               icon="mdi-play"
               @click="playTrack(playlistTrack.track.id)"
@@ -58,15 +83,15 @@
           </td>
           <td>
             <v-list-item-title>{{ playlistTrack.track.name }}</v-list-item-title>
-            <v-list-item-subtitle>{{ playlistTrack.track.name }}</v-list-item-subtitle>
+            <v-list-item-subtitle>{{ playlistTrack.track.artists[0].name }}</v-list-item-subtitle>
           </td>
           <td>{{ playlistTrack.track.album.name }}</td>
           <td>{{ moment(playlistTrack.added_at).format("DD MMM. YYYY") }}</td>
           <td class="text-right">
             {{ millisToMinutesAndSeconds(playlistTrack.track.duration_ms) }}
           </td>
-          <td>
-            <v-icon v-if="playerStore.queue.some(t => t.id == playlistTrack.track.id)">
+          <td class="text-center">
+            <v-icon v-if="playerStore.queue.some(t => t.track_id == playlistTrack.track.id)">
               mdi-playlist-check
             </v-icon>
             <v-btn
@@ -90,6 +115,9 @@ import api from "@/services/api";
 import { millisToMinutesAndSeconds } from "@/utils";
 import moment from 'moment'
 import { usePlayerStore } from '@/plugins/store/player';
+
+import audioPlayingAnimation from '@/assets/audio-playing-animation.json'
+
 
 export default {
   setup() {
@@ -141,7 +169,7 @@ export default {
     }
 
     function addToQueue(trackID: string){
-      api.addToPlayerQueue([trackID])
+      api.addToPlayerQueue(trackID)
     }
 
     onMounted(() => {
@@ -156,7 +184,7 @@ export default {
     });
 
     watch(
-      () => route.params.uri,
+      () => route.params.id,
       () => {
         state.playlistID = route.params.id as string;
 
@@ -176,6 +204,7 @@ export default {
       playerStore,
       addToQueue,
       millisToMinutesAndSeconds,
+      audioPlayingAnimation
     }
   },
 };

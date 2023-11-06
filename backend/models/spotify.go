@@ -2,8 +2,6 @@ package models
 
 import (
 	"strings"
-
-	"github.com/zmb3/spotify/v2"
 )
 
 type SpotifyURI string
@@ -36,7 +34,6 @@ type SpotifyPlayerControl struct {
 	Pause           *bool    `json:"pause"`
 }
 
-type SpotifyQueuedTrack struct {
-	Track         spotify.FullTrack `json:"track"`
-	ManuallyAdded bool              `json:"manually_added"`
+type AddToPlayerQueueOptions struct {
+	PlaylistID *string `json:"playlist_id"`
 }

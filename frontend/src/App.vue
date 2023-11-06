@@ -6,14 +6,17 @@
       app
     >
       <div
-        class="d-flex"
+        class="d-flex align-center justify-center mx-4"
         @click="$router.push({name: $constants.ROUTE_NAMES.HOME})"
       >
-        <v-icon start>
+        <v-icon
+          start
+          size="40"
+        >
           mdi-robot-excited-outline
         </v-icon>
-        <v-app-bar-title class="font-weight-bold">
-          James
+        <v-app-bar-title class="font-weight-bold ml-2">
+          JAMES
         </v-app-bar-title>
       </div>
       <v-sheet
@@ -81,22 +84,7 @@
       </v-list>
     </v-navigation-drawer>
 
-    <div>
-      <router-view />
-
-      <v-dialog
-        v-model="dialogs.playerDetails"
-        fullscreen
-        attach
-        absolute
-        :scrim="false"
-        transition="dialog-bottom-transition"
-      >
-        <v-card>
-          <player-details />
-        </v-card>
-      </v-dialog>
-    </div>
+    <router-view />
 
     <v-snackbar
       v-model="snackbar.visible"
@@ -131,19 +119,20 @@ import { useRouter } from "vue-router";
 import { useAuthStore } from "@/plugins/store/auth";
 
 import Player from "@/components/Player.vue";
-import PlayerDetails from '@/components/PlayerDetails.vue'
 
 import eventbus from "@/services/eventbus";
 import api from "@/services/api";
 
 import { SpotifyPlaylist } from "@/types";
 import { useCommonStore } from './plugins/store/common';
+import { usePlayerStore } from './plugins/store/player';
 
 export default {
-  components: { Player, PlayerDetails },
+  components: { Player },
   setup() {
     const authStore = useAuthStore();
     const commonStore = useCommonStore();
+    const playerStore = usePlayerStore();
 
     const router = useRouter();
 
@@ -155,14 +144,15 @@ export default {
         color: "",
         message: "",
       },
-      dialogs:{
-        playerDetails: false,
-      },
       loadingPlaylists: false,
       spotifyPlaylists: [] as SpotifyPlaylist[],
     });
 
     onMounted(()=>{
+      api.getBasics().then(({data}) => {
+        playerStore.updateFromPlayerStatus(data.player_status)
+        playerStore.queue = data.player_queue || []
+      })
       api
         .getParameters()
         .then(({ data }) => {

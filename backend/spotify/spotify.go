@@ -16,9 +16,10 @@ type ID spotify.ID
 type PlayerState string
 
 const (
-	PlayerStatePlaying ID = "playing"
-	PlayerStatePaused  ID = "paused"
-	PlayerStateStopped ID = "stopped"
+	PlayerStatePlaying PlayerState = "playing"
+	PlayerStatePaused  PlayerState = "paused"
+	PlayerStateStopped PlayerState = "stopped"
+	PlayerStateLoading PlayerState = "loading"
 )
 
 type PlayerStatus struct {
@@ -26,6 +27,7 @@ type PlayerStatus struct {
 	CurrentQueueIndex int               `json:"current_queue_index"`
 	TrackDuration     models.DurationMs `json:"track_duration"`
 	TrackPosition     models.DurationMs `json:"track_position"`
+	Volume            int               `json:"volume"` // in % (0-100)
 }
 
 type Player struct {
@@ -54,6 +56,7 @@ type Session struct {
 	webapiClient     *spotify.Client
 	player           Player
 	listeners        Listeners
+	ticking          bool
 }
 
 func (s *Session) ListenOnPlayerStatusChange(listener func(s PlayerStatus)) {

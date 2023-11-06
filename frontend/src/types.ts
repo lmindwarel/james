@@ -4,6 +4,11 @@ export interface BaseModel{
     date_updated: string
 }
 
+export interface JamesBasics {
+    player_status: PlayerStatus
+    player_queue: QueuedTrack[]
+}
+
 export interface Parameters {
     current_spotify_credential: string | null
 }
@@ -63,11 +68,15 @@ export interface SpotifyTrack {
     uri: string,
     album: SpotifyAlbum
     duration_ms: number
+    artists: SpotifyArtist[]
 }
 
-export interface PlayerQueuedTrack {
-    track_id: string,
-    manually_added: boolean,}
+export interface SpotifyArtist {
+    id: string
+    name: string
+    uri: string
+    href: string
+}
 
 export interface SpotifyPlaylistTracksResult extends SpotifyPagination {
     items: SpotifyPlaylistTrack[]
@@ -91,6 +100,7 @@ export enum PlayerStates {
     Playing = 'playing',
     Paused = 'paused',
     Stopped = 'stopped',
+    Loading = 'loading',
 }
 
 export interface WebsocketMessage {
@@ -103,7 +113,7 @@ export interface PlayerStatus {
     current_queue_index: number
 	track_duration: number
 	track_position: number
-    authenticated_user: string | null
+    volume: number
 }
 
 export interface SpotifyPlayerControl {

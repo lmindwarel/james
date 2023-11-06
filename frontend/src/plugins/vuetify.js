@@ -2,11 +2,17 @@
 import '@mdi/font/css/materialdesignicons.css'
 import 'vuetify/styles'
 
+// Labs components
+import { VSkeletonLoader } from 'vuetify/labs/VSkeletonLoader'
+
 // Vuetify
 import { createVuetify } from 'vuetify'
 
 export default createVuetify(
   {
+    components: {
+      VSkeletonLoader
+    },
     theme: {
       themes: {
         light: {

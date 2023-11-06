@@ -35,6 +35,7 @@
           />
           <v-btn
             :icon="playerStore.state == PlayerStates.Playing ? 'mdi-pause': 'mdi-play'"
+            class="mx-1"
             @click="togglePlayerState"
           />
           <v-btn
@@ -42,16 +43,26 @@
             variant="flat"
           />
         </div>
-      </div>
-      <div class="d-flex align-center">
-        {{ progressionText }}
-        <v-slider
-          v-model="progression"
-          hide-details
-          class="mx-2"
-          density="compact"
-        />
-        {{ trackDurationText }}
+
+        <div class="d-flex align-center">
+          {{ progressionText }}
+          <v-sheet
+            class="mx-4"
+            width="500px"
+          >
+            <v-progress-linear
+              v-if="playerStore.state == PlayerStates.Loading"
+              indeterminate
+            />
+            <v-slider
+              v-else
+              v-model="progression"
+              hide-details
+              density="compact"
+            />
+          </v-sheet>
+          {{ trackDurationText }}
+        </div>
       </div>
     </v-col>
 
@@ -60,12 +71,14 @@
         <v-btn
           variant="flat"
           icon="mdi-menu"
-          @click="$emit('open-details')"
+          @click="$router.push({name: 'queue'})"
         />
         <v-slider
+          v-model="volume"
           density="compact"
           hide-details
           prepend-icon="mdi-volume-high"
+          @end="updateVolume"
         />
       </div>
     </v-col>
@@ -73,7 +86,7 @@
 </template>
 
 <script lang="ts">
-import { computed, reactive, toRefs, } from "vue";
+import { computed, reactive, ref, toRefs, watch } from "vue";
 import { usePlayerStore } from "@/plugins/store/player";
 import { millisToMinutesAndSeconds } from "@/utils";
 import { PlayerStates, SpotifyPlayerControl } from "@/types";
@@ -84,16 +97,22 @@ export default {
   setup() {
     const playerStore = usePlayerStore();
 
+    const state = reactive({
+      volume: 0 as number,
+    });
+
     const controlDebouced = _.debounce((control: SpotifyPlayerControl) => {
-      api.controlSpotifyPlayer(control).then(res => {
-        playerStore.updateFromPlayerStatus(res.data)
+      api.controlSpotifyPlayer(control).then((res) => {
+        playerStore.updateFromPlayerStatus(res.data);
       });
     }, 400);
 
     const progression = computed({
       get() {
         return !!playerStore.current_track
-          ? (playerStore.track_position / playerStore.current_track?.duration_ms) * 100
+          ? (playerStore.track_position /
+              playerStore.current_track?.duration_ms) *
+              100
           : 0;
       },
       set(newValue: number) {
@@ -110,6 +129,21 @@ export default {
     const progressionText = computed(() =>
       millisToMinutesAndSeconds(playerStore.track_position)
     );
+
+    function updateVolume(){
+      controlDebouced({
+            volume: Math.floor(state.volume),
+          });
+    }
+
+    watch(()=> playerStore.volume, ()=> {
+      if (playerStore.volume){
+        state.volume = playerStore.volume
+      } else {
+        state.volume = 0
+      }
+    })
+
     const trackDurationText = computed(() =>
       playerStore.current_track
         ? millisToMinutesAndSeconds(playerStore.current_track.duration_ms)
@@ -125,6 +159,8 @@ export default {
     }
 
     return {
+      ...toRefs(state),
+      updateVolume,
       progression,
       playerStore,
       PlayerStates,
