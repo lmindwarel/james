@@ -3,5 +3,6 @@ export const ROUTE_NAMES = {
   AUTHENTICATION: 'authentication',
   PLAYLIST: 'playlist',
   QUEUE: 'queue',
-  SETTINGS: 'settings'
+  SETTINGS: 'settings',
+  SAVED_TRACKS: 'saved-tracks'
 }

@@ -29,7 +29,7 @@ type SpotifyTrack struct {
 }
 
 type SpotifyPlayerControl struct {
-	Volume          *float64 `json:"volume"`
+	Volume          *float64 `json:"volume"` // 0-1
 	TrackPositionMs *int     `json:"track_position_ms"`
 	Pause           *bool    `json:"pause"`
 }

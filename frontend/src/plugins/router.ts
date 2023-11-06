@@ -20,6 +20,11 @@ const router = createRouter({
       component: () => import('@/views/Playlist.vue')
     },
     {
+      path: '/saved-tracks',
+      name: ROUTE_NAMES.SAVED_TRACKS,
+      component: () => import('@/views/SavedTracks.vue')
+    },
+    {
       path: '/queue',
       name: ROUTE_NAMES.QUEUE,
       component: () => import('@/views/Queue.vue')

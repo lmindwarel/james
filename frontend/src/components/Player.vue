@@ -77,6 +77,9 @@
           v-model="volume"
           density="compact"
           hide-details
+          min="0"
+          max="1"
+          step="0.1"
           prepend-icon="mdi-volume-high"
           @end="updateVolume"
         />
@@ -132,7 +135,7 @@ export default {
 
     function updateVolume(){
       controlDebouced({
-            volume: Math.floor(state.volume),
+            volume: state.volume,
           });
     }
 

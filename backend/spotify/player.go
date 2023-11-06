@@ -153,6 +153,7 @@ func (s *Session) Resume() {
 
 func (s *Session) ensureTickerStarted() {
 	if s.ticking {
+		log.Debugf("ticker already started")
 		return
 	}
 
@@ -164,8 +165,10 @@ func (s *Session) ensureTickerStarted() {
 				return
 			}
 
+			log.Debugf("tick: %d", time.Duration(s.player.TrackPosition).Milliseconds())
+
 			s.player.TrackPosition = models.DurationMs(s.player.sampleRate.D(s.player.streamer.Position()))
-			s.player.Volume = int(s.player.volume.Volume)
+			s.player.Volume = s.player.volume.Volume
 			// log.Debugf("track position: %dms, duration: %dms", time.Duration(s.player.TrackPosition).Milliseconds(), time.Duration(s.player.TrackDuration).Milliseconds())
 			if s.player.TrackPosition >= s.player.TrackDuration {
 				s.onCurrentTrackEnd()
@@ -176,6 +179,7 @@ func (s *Session) ensureTickerStarted() {
 			}
 
 			if s.player.State != PlayerStatePlaying {
+				s.ticking = false
 				return // stop ticking
 			}
 
@@ -229,6 +233,6 @@ func (s *Session) SetTrackPosition(pos time.Duration) error {
 
 func (s *Session) SetVolume(vol float64) error {
 	s.player.volume.Volume = vol
-	s.player.PlayerStatus.Volume = int(vol)
+	s.player.PlayerStatus.Volume = vol
 	return nil
 }

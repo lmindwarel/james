@@ -62,7 +62,7 @@
         <v-list-item
           prepend-icon="mdi-heart"
           title="Titres likés"
-          to="/liked-tracks"
+          to="/saved-tracks"
         />
 
         <v-divider />

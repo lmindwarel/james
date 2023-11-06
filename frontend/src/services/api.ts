@@ -42,6 +42,7 @@ export default {
   getSpotifyCredentials: () => apiClient.get<SpotifyCredential[]>('/spotify/credentials'),
   createSpotifyCredential: (credential: CredentialPatch) => apiClient.post<SpotifyCredential>('/spotify/credentials', credential),
   patchSpotifyCredential: (id: string, credential: CredentialPatch) => apiClient.patch<SpotifyCredential>(`/spotify/credentials/${id}`, credential),
+  getSpotifySavedTracks: () => apiClient.get<SpotifyPlaylistTracksResult>('/spotify/saved-tracks'),
   getSpotifyPlaylists: () => apiClient.get<SpotifyPlaylistsResult>('/spotify/playlists'),
   getSpotifyPlaylist:(id: string)=> apiClient.get<SpotifyPlaylist>(`/spotify/playlists/${id}`),
   getSpotifyPlaylistTracks: (playlistID: string) => apiClient.get<SpotifyPlaylistTracksResult>(`/spotify/playlists/${playlistID}/tracks`),

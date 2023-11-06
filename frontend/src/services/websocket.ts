@@ -31,7 +31,7 @@ connect()
 
 function handleMessage(message: WebsocketMessage) {
     const playerStore = usePlayerStore()
-    // console.log("received message", message)
+    console.log("received message", message)
     switch (message.topic) {
         case "player-status":
             playerStore.updateFromPlayerStatus(message.data as PlayerStatus)

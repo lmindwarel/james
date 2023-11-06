@@ -42,3 +42,12 @@ func (s *Session) GetTrack(ctx context.Context, id ID) (result *spotify.FullTrac
 
 	return
 }
+
+func (s *Session) GetCurrentUserSavedTracks(ctx context.Context) (result *spotify.SavedTrackPage, err error) {
+	result, err = s.webapiClient.CurrentUsersTracks(ctx)
+	if err != nil || result == nil {
+		return result, errors.Wrapf(err, "failed to get saved tracks")
+	}
+
+	return
+}

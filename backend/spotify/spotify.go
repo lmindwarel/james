@@ -27,7 +27,7 @@ type PlayerStatus struct {
 	CurrentQueueIndex int               `json:"current_queue_index"`
 	TrackDuration     models.DurationMs `json:"track_duration"`
 	TrackPosition     models.DurationMs `json:"track_position"`
-	Volume            int               `json:"volume"` // in % (0-100)
+	Volume            float64           `json:"volume"` // in (0-1)
 }
 
 type Player struct {

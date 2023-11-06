@@ -77,6 +77,8 @@ func (a *API) wshandler(c *gin.Context) {
 				log.Errorf("Failed to send websocket message: %s", err)
 			}
 		})
+	} else {
+		log.Errorf("Failed to get spotify session: %s", notFatalErr)
 	}
 
 	ticker := time.NewTicker(100 * time.Millisecond)

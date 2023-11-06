@@ -26,6 +26,7 @@ func (a *API) setupRoutes(e *gin.Engine) {
 	spotify.GET("/playlists", a.GetSpotifyPlaylists)
 	spotify.GET("/playlists/:id", a.GetSpotifyPlaylist)
 	spotify.GET("/playlists/:id/tracks", a.GetSpotifyPlaylistTracks)
+	spotify.GET("/saved-tracks", a.GetSpotifySavedTracks)
 	spotify.GET("/tracks/:id", a.GetSpotifyTrack)
 	spotify.PUT("/player/play/:id", a.PlaySpotifyTrack)
 	spotify.PUT("/player/control", a.ControlSpotifyPlayer)

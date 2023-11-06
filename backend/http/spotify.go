@@ -141,6 +141,21 @@ func (a *API) GetSpotifyPlaylistTracks(c *gin.Context) {
 	c.JSON(http.StatusOK, tracksResult)
 }
 
+func (a *API) GetSpotifySavedTracks(c *gin.Context) {
+	spotifySession, err := a.ctrl.GetSpotifySession()
+	if err != nil {
+		c.AbortWithError(http.StatusNetworkAuthenticationRequired, err)
+	}
+
+	tracksResult, err := spotifySession.GetCurrentUserSavedTracks(c.Request.Context())
+	if err != nil {
+		c.AbortWithError(http.StatusInternalServerError, err)
+		return
+	}
+
+	c.JSON(http.StatusOK, tracksResult)
+}
+
 func (a *API) PlaySpotifyTrack(c *gin.Context) {
 	spotifySession, err := a.ctrl.GetSpotifySession()
 	if err != nil {
@@ -210,7 +225,6 @@ func (a *API) ControlSpotifyPlayer(c *gin.Context) {
 	}
 
 	if control.Volume != nil {
-		log.Debugf("set volume to %d", *control.Volume)
 		err = spotifySession.SetVolume(*control.Volume)
 		if err != nil {
 			c.AbortWithError(http.StatusInternalServerError, err)
