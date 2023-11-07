@@ -47,6 +47,7 @@ export default {
   getSpotifyPlaylist:(id: string)=> apiClient.get<SpotifyPlaylist>(`/spotify/playlists/${id}`),
   getSpotifyPlaylistTracks: (playlistID: string) => apiClient.get<SpotifyPlaylistTracksResult>(`/spotify/playlists/${playlistID}/tracks`),
   getSpotifyTrack: (trackID: string) => apiClient.get<SpotifyTrack>(`/spotify/tracks/${trackID}`),
+  getSpotifyTracks: (ids: string[]) => apiClient.get<SpotifyTrack[]>(`/spotify/tracks`, { params: { ids } }),
   playSpotifyTrack: (id:string) => apiClient.put(`/spotify/player/play/${id}`),
   controlSpotifyPlayer: (control: SpotifyPlayerControl)=> apiClient.put<PlayerStatus>('/spotify/player/control', control),
   addToPlayerQueue: (trackID: string)=> apiClient.post(`/spotify/player/queue/${trackID}`),

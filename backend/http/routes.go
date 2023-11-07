@@ -28,11 +28,12 @@ func (a *API) setupRoutes(e *gin.Engine) {
 	spotify.GET("/playlists/:id/tracks", a.GetSpotifyPlaylistTracks)
 	spotify.GET("/saved-tracks", a.GetSpotifySavedTracks)
 	spotify.GET("/tracks/:id", a.GetSpotifyTrack)
+	spotify.GET("/tracks", a.GetSpotifyTracks)
 	spotify.PUT("/player/play/:id", a.PlaySpotifyTrack)
 	spotify.PUT("/player/control", a.ControlSpotifyPlayer)
 	spotify.POST("/player/queue/:trackID", a.AddToPlayerQueue)
 	spotify.GET("/player/queue", a.GetPlayerQueue)
-	spotify.DELETE("/player/queue/:trackID", a.DeleteTrackFromPlayerQueue)
+	spotify.DELETE("/player/queue/:id", a.DeleteTrackFromPlayerQueue)
 
 	// per group middleware! in this case we use the custom created
 	// AuthRequired() middleware just in the "authorized" group.

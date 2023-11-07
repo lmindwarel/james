@@ -29,14 +29,24 @@
       </thead>
       <tbody>
         <tr
-          v-for="queuedTrack of tracks"
-          :key="queuedTrack.track.id"
+          v-for="queuedTrack of queuedTracks"
+          :key="queuedTrack.id"
         >
           <td class="text-right">
+            <v-sheet
+              v-if="playerStore.current_track?.id == queuedTrack.id"
+              width="50px"
+            >
+              <vue-3-lottie
+                :animation-data="audioPlayingAnimation"
+              />
+            </v-sheet>
+            
             <v-btn
+              v-else
               variant="text"
               icon="mdi-play"
-              @click="playTrack(queuedTrack.track.id)"
+              @click="playTrack(queuedTrack.id)"
             />
           </td>
           <td>
@@ -51,7 +61,7 @@
             <v-btn
               variant="flat"
               icon="mdi-delete"
-              @click="removeTrackFromQueue(queuedTrack.track.id)"
+              @click="removeTrackFromQueue(queuedTrack.id)"
             />
           </td>
         </tr>
@@ -61,29 +71,41 @@
 </template>
 
 <script lang="ts">
-import { reactive, onMounted, toRefs } from "vue";
-import { QueuedTrack } from "@/types";
+import { reactive, onMounted, toRefs, watch, computed } from "vue";
+import { SpotifyTrack } from "@/types";
 import api from "@/services/api";
 import { millisToMinutesAndSeconds } from "@/utils";
 import moment from 'moment'
+import { usePlayerStore } from "@/plugins/store/player";
+
+import audioPlayingAnimation from '@/assets/audio-playing-animation.json'
 
 export default {
   setup() {
     const state = reactive({
-      tracks: [] as QueuedTrack[],
+      tracks: [] as SpotifyTrack[],
       loading: {
         tracks: false,
       },
     });
 
+    const playerStore = usePlayerStore();
+
     function refresh(){
-      fetchPlaylistTracks()
+      fetchTracks()
     }
 
-    function fetchPlaylistTracks() {
+    function fetchTracks() {
+      const tracksIDs = playerStore.queue.map((queuedTrack) => queuedTrack.track_id);
+
+      if (!tracksIDs.length){
+        state.tracks = []
+        return
+      }
+
       state.loading.tracks = true;
       api
-        .getPlayerQueue()
+        .getSpotifyTracks(tracksIDs)
         .then(({ data }) => {
           state.tracks = data;
         })
@@ -96,20 +118,27 @@ export default {
       api.playSpotifyTrack(id)
     }
 
-    function removeTrackFromQueue(trackID: string){
-      api.removeFromPlayerQueue(trackID)
+    function removeTrackFromQueue(id: string){
+      api.removeFromPlayerQueue(id)
     }
+
+    watch(() => playerStore.queue, refresh);
 
     onMounted(() => {
       refresh();
     });
 
+  const queuedTracks = computed(() => playerStore.queue.map((queuedTrack) => Object.assign({}, queuedTrack, {track: state.tracks.find((track) => track.id == queuedTrack.track_id)})))
+
     return {
       ...toRefs(state),
       moment,
       playTrack,
+      playerStore,
       removeTrackFromQueue,
       millisToMinutesAndSeconds,
+      audioPlayingAnimation,
+      queuedTracks
     }
   },
 };

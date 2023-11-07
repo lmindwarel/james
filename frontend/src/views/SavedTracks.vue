@@ -95,7 +95,7 @@
 
 <script lang="ts">
 import { reactive, onMounted, watch, toRefs } from "vue";
-import { SpotifyPlaylistTrack, SpotifyPlaylist } from "@/types";
+import { SpotifyPlaylistTrack } from "@/types";
 import { useRoute } from "vue-router";
 import api from "@/services/api";
 import { millisToMinutesAndSeconds } from "@/utils";
@@ -103,7 +103,6 @@ import moment from 'moment'
 import { usePlayerStore } from '@/plugins/store/player';
 
 import audioPlayingAnimation from '@/assets/audio-playing-animation.json'
-
 
 export default {
   setup() {

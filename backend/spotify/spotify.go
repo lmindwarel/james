@@ -41,8 +41,9 @@ type Player struct {
 }
 
 type QueuedTrack struct {
-	TrackID       ID   `json:"track_id"`
-	ManuallyAdded bool `json:"manually_added"`
+	ID            models.UUID `json:"id"`
+	TrackID       ID          `json:"track_id"`
+	ManuallyAdded bool        `json:"manually_added"`
 }
 
 type Listeners struct {

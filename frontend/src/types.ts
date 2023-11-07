@@ -123,6 +123,7 @@ export interface SpotifyPlayerControl {
 }
 
 export interface QueuedTrack {
+    id: string,
     track_id: string
     manually_added: boolean
 }

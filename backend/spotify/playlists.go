@@ -43,6 +43,24 @@ func (s *Session) GetTrack(ctx context.Context, id ID) (result *spotify.FullTrac
 	return
 }
 
+func (s *Session) GetTracks(ctx context.Context, ids []ID) (result []*spotify.FullTrack, err error) {
+	var spotifyIDs []spotify.ID
+	for _, id := range ids {
+		spotifyIDs = append(spotifyIDs, spotify.ID(id))
+	}
+
+	if len(spotifyIDs) == 0 {
+		return result, nil
+	}
+
+	result, err = s.webapiClient.GetTracks(ctx, spotifyIDs)
+	if err != nil || result == nil {
+		return result, errors.Wrapf(err, "failed to get tracks")
+	}
+
+	return
+}
+
 func (s *Session) GetCurrentUserSavedTracks(ctx context.Context) (result *spotify.SavedTrackPage, err error) {
 	result, err = s.webapiClient.CurrentUsersTracks(ctx)
 	if err != nil || result == nil {

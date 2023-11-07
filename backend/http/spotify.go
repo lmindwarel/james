@@ -175,9 +175,26 @@ func (a *API) GetSpotifyTrack(c *gin.Context) {
 	spotifySession, err := a.ctrl.GetSpotifySession()
 	if err != nil {
 		c.AbortWithError(http.StatusNetworkAuthenticationRequired, err)
+		return
 	}
 
 	track, err := spotifySession.GetTrack(c.Request.Context(), spotify.ID(c.Param("id")))
+	if err != nil {
+		c.AbortWithError(http.StatusInternalServerError, err)
+		return
+	}
+
+	c.JSON(http.StatusOK, track)
+}
+
+func (a *API) GetSpotifyTracks(c *gin.Context) {
+	spotifySession, err := a.ctrl.GetSpotifySession()
+	if err != nil {
+		c.AbortWithError(http.StatusNetworkAuthenticationRequired, err)
+		return
+	}
+
+	track, err := spotifySession.GetTracks(c.Request.Context(), spotify.StringSliceToIDs(c.QueryArray("ids[]")))
 	if err != nil {
 		c.AbortWithError(http.StatusInternalServerError, err)
 		return
@@ -267,5 +284,5 @@ func (a *API) DeleteTrackFromPlayerQueue(c *gin.Context) {
 		c.AbortWithError(http.StatusNetworkAuthenticationRequired, err)
 	}
 
-	spotifySession.RemoveTrackFromQueue(spotify.ID(c.Param("trackID")))
+	spotifySession.RemoveTrackFromQueue(models.UUID(c.Param("id")))
 }
